@@ -1,0 +1,145 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Overview &#8212; spike2py 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="spike2py" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="spike2py"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">spike2py 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">spike2py</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">Tutorial</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/overview.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://ced.co.uk/products/spkovin">Spike2</a> is the software used by many scientists to collect data using a
+<a class="reference external" href="http://ced.co.uk/">Cambridge Electronics Design (CED)</a> data aquisition boards. While some
+scientists use Spike2 to analyse their data, other scientists prefer to export
+their data to other programs such as Matlab or Python.</p>
+<p>There are ways to directly open Spike2 data files in Python. For example,
+<a class="reference external" href="https://github.com/NeuralEnsemble/python-neo">Neo</a> is a package for analysing electrophysiology data that supports reading
+a wide range of neurophysiology file formats, including Spike2 files.
+However, package updates have been known to cause <a class="reference external" href="https://scientificallysound.org/2018/04/05/import-spike2-into-python/">issues</a> with reading Spike2
+files. Moreover, the Neo framework was specifically designed to handle data from
+electrophysiological experiments (cellular and animal recordings; it is less well
+suited, or simply overkill, for data collected for life sciences, biomechanics,
+and human neurophysiology experiments.</p>
+<p>As an alternative, Spike2 data can be exported to Matlab data files (.mat). While
+this requires the user to export data prior to opening it in Python, this
+approach has some advantages. First, CED makes available a Spike2 script that
+can batch export all Spike2 data files contained within a folder. A copy of this
+script file is available <a class="reference external" href="https://github.com/MartinHeroux/spike2py/blob/master/tutorials/Batch_export_MATLAB.s2s">here</a>. Second, opening Matlab data files has been
+supported for a long time in Python through the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/io.html">scipy.io</a> module.</p>
+<p>The one downside to this approach is that when these Matlab data files are
+opened in Python, it is not intuitive how the data are organized, nor where
+the various details of your signal might be stored (e.g. sampling rate, sample
+times, etc). Rarely would someone ever work directly with the default structure
+of nested numpy arrays in a dictionary.</p>
+<p>The present module provides a simple interface to signals and triggers recorded
+in Spike2. The main building blocks are a <a class="reference internal" href="api.html#spike2py.Signal" title="spike2py.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a> class and
+a <a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> class. The <a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> class can store
+all the signals recorded during a trial, as well
+as other details related to that trial. Basic signal processessing, such as
+calibration, filtering, offset removal, can be applied to the signals. There is
+also a default routine for surface electromyography (EMG) recordings (filtering,
+rectifying, envelop filtering). The module include several helper classes to
+streamline how <a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> and <a class="reference internal" href="api.html#spike2py.Signal" title="spike2py.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a> are accessed.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="spike2py"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">spike2py 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Martin Héroux.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+    </div>
+  </body>
+</html>

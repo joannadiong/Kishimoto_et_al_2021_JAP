@@ -1,0 +1,770 @@
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /home/joanna/Dropbox/Projects/activation/src/code/stats/log_files/Log  6 Oct 2020 09h41m37s.log
+  log type:  text
+ opened on:   6 Oct 2020, 09:41:37
+
+.   copy `pathandnameofdofile' `backupdofilename'
+
+.   cd `pathofdatafilesname'
+/home/joanna/Dropbox/Projects/activation/src/code/stats/data
+
+. 
+. 
+.     ********** IMPORT DATA ********** 
+. 
+.   cd `pathofdatafilesname'
+/home/joanna/Dropbox/Projects/activation/src/code/stats/data
+
+.   import delimited using "subjects_data.csv", delimiters(",") varnames(1)
+(11 vars, 250 obs)
+.   
+.   egen subjectGroup = group(subject)
+
+.   sort activations
+
+.         
+. 
+.     ********** GRAPH DATA ********** 
+.   
+.   cd `pathofgraphfilesname'
+/home/joanna/Dropbox/Projects/activation/src/code/stats/graphs
+
+.         
+. 
+.   foreach var of varlist torques emgso emgmg emglg {
+  2. 
+.     * Plot individual subject data with regression lines.
+. 
+.     forvalues subject = 1/25 { 
+  3.       if `var' == torques {
+  4.         twoway (line activations `var' if subjectGroup == `subject', lpattern(solid)) ///
+>           (lfit activations `var' if subjectGroup == `subject', lpattern(solid) lcolor(red)) ///
+>           , ///
+>           xtitle("Torque [%MVC]") ytitle("Activation [%]") scale(0.8) legend(off) name(eachSubject`subject', replace)
+  5.       }
+  6.       if `var' == emgso {
+  7.         twoway (line `var' activations if subjectGroup == `subject', lpattern(solid)) ///
+>           (lfit `var' activations if subjectGroup == `subject', lpattern(solid) lcolor(red)) ///
+>           , ///
+>           xtitle("Activation [%]") ytitle("EMG SO [mV]") scale(0.8) legend(off) name(eachSubject`subject', replace)
+  8.       }
+  9.       if `var' == emgmg {
+ 10.         twoway (line `var' activations if subjectGroup == `subject', lpattern(solid)) ///
+>           (lfit `var' activations if subjectGroup == `subject', lpattern(solid) lcolor(red)) ///
+>           , ///
+>           xtitle("Activation [%]") ytitle("EMG MG [mV]") scale(0.8) legend(off) name(eachSubject`subject', replace)
+ 11.       }
+ 12.       if `var' == emglg {
+ 13.         twoway (line `var' activations if subjectGroup == `subject', lpattern(solid)) ///
+>           (lfit `var' activations if subjectGroup == `subject', lpattern(solid) lcolor(red)) ///
+>           , ///
+>           xtitle("Activation [%]") ytitle("EMG LG [mV]") scale(0.8) legend(off) name(eachSubject`subject', replace)
+ 14.       }
+ 15.     }
+ 16.     graph combine eachSubject1 eachSubject2 eachSubject3 eachSubject4 eachSubject5 ///
+>                   eachSubject6 eachSubject7 eachSubject8 eachSubject9 eachSubject10 ///
+>                   eachSubject11 eachSubject12 eachSubject13 eachSubject14 eachSubject15 ///
+>                   eachSubject16 eachSubject17 eachSubject18 eachSubject19 eachSubject20 ///
+>                   eachSubject21 eachSubject22 eachSubject23 eachSubject24 eachSubject25 ///
+>                   , ///
+>                   xcommon ycommon name(each_`var', replace)
+ 17.     graph export each_`var'.tif, width(1200) height(900) replace
+ 18.     graph drop eachSubject1 eachSubject2 eachSubject3 eachSubject4 eachSubject5 ///
+>                eachSubject6 eachSubject7 eachSubject8 eachSubject9 eachSubject10 ///
+>                eachSubject11 eachSubject12 eachSubject13 eachSubject14 eachSubject15 ///
+>                eachSubject16 eachSubject17 eachSubject18 eachSubject19 eachSubject20 ///
+>                eachSubject21 eachSubject22 eachSubject23 eachSubject24 eachSubject25
+ 19. 
+.     * Plot EMG-activation individual subject data on one plot.
+. 
+.     forvalues subject = 1/25 {
+ 20.       local graphtext1 `graphtext1' (line `var' activations if subjectGroup == `subject', lpattern(solid) lcolor(gs10))
+ 21.       local graphtext1_ `graphtext1_' (line activations `var' if subjectGroup == `subject', lpattern(solid) lcolor(gs10))
+ 22.     }
+ 23.     sort activations
+ 24. 
+.     if `var' == torques {
+ 25.       twoway `graphtext1_' ///
+>         , ///
+>         xtitle("Torque [%MVC]") ytitle("Activation [%]") legend(off) aspect(1) name(all_`var', replace)
+ 26.     }
+ 27.     if `var' == emgso {
+ 28.       twoway `graphtext1' ///
+>         , ///
+>         xtitle("Activation [%]") ytitle("EMG SO [mV]") legend(off) aspect(1) name(all_`var', replace)
+ 29.     }
+ 30.     if `var' == emgmg {
+ 31.       twoway `graphtext1' ///
+>         , ///
+>         xtitle("Activation [%]") ytitle("EMG MG [mV]") legend(off) aspect(1) name(all_`var', replace)
+ 32.     }
+ 33.     if `var' == emglg {
+ 34.       twoway `graphtext1' ///
+>         , ///
+>         xtitle("Activation [%]") ytitle("EMG LG [mV]") legend(off) aspect(1) name(all_`var', replace)
+ 35.     }
+ 36.     graph export all_`var'.tif, width(1200) height(900) replace
+ 37. 
+.     local graphtext1 = ""
+ 38.     local graphtext1_ = ""
+ 39. 
+.   }
+(file each_torques.tif written in TIFF format)
+(file all_torques.tif written in TIFF format)
+(file each_emgso.tif written in TIFF format)
+(file all_emgso.tif written in TIFF format)
+(file each_emgmg.tif written in TIFF format)
+(file all_emgmg.tif written in TIFF format)
+(file each_emglg.tif written in TIFF format)
+(file all_emglg.tif written in TIFF format)
+
+. 
+.         ********** ANALYSE DATA ********** 
+.                 
+.   cls
+
+.   
+.     * Drop subject EMG data if trial EMG values are further than 4 SD from mean EMG 
+.   
+.   bys trial: egen avlnemgso = mean(lnemgso)
+
+.   bys trial: egen sdlnemgso = sd(lnemgso)
+
+.   
+.   bys trial: egen avlnemgmg = mean(lnemgmg)
+
+.   bys trial: egen sdlnemgmg = sd(lnemgmg)
+
+.   
+.   bys trial: egen avlnemglg = mean(lnemglg)
+
+.   bys trial: egen sdlnemglg = sd(lnemglg)
+
+.   
+.   forvalues subject = 1/25 {
+  2.     list subject lnemgso if subjectGroup == `subject' & (lnemgso  <= avlnemgso - 4 * sdlnemgso | lnemgso  >= avlnemgso + 4 * sdlnemgso)
+  3.     list subject lnemgmg if subjectGroup == `subject' & (lnemgmg  <= avlnemgmg - 4 * sdlnemgmg | lnemgmg  >= avlnemgmg + 4 * sdlnemgmg)
+  4.     list subject lnemglg if subjectGroup == `subject' & (lnemglg  <= avlnemglg - 4 * sdlnemglg | lnemglg  >= avlnemglg + 4 * sdlnemglg)
+  5.   }
+
+     +---------------------+
+     | subject     lnemgmg |
+     |---------------------|
+172. |   sub17   -8.733596 |
+185. |   sub17   -8.968506 |
+218. |   sub17   -8.844999 |
+     +---------------------+
+
+.   replace lnemgmg = . if subject == "sub17"
+(10 real changes made, 10 to missing)
+
+.   sort subject trials
+
+.   
+.     * Analyse activations and logged EMG data
+.   
+.   foreach var of varlist torques lnemgso lnemgmg lnemglg {
+  2.   
+.     * Plot lnEMG-activation individual subject data on one plot.
+. 
+.     forvalues subject = 1/25 {
+  3.       local graphtext1 `graphtext1' (line `var' activations if subjectGroup == `subject', lpattern(solid) lcolor(gs10))
+  4.     }
+  5.     sort activations
+  6. 
+.     if `var' == lnemgso {
+  7.       twoway `graphtext1' ///
+>         , ///
+>         xtitle("Activation [%]") ytitle("EMG SO [ln(mV)]") legend(off) aspect(1) name(all_`var', replace)
+  8.     }
+  9.     if `var' == lnemgmg {
+ 10.       twoway `graphtext1' ///
+>         , ///
+>         xtitle("Activation [%]") ytitle("EMG MG [ln(mV)]") legend(off) aspect(1) name(all_`var', replace)
+ 11.     }
+ 12.     if `var' == lnemglg {
+ 13.       twoway `graphtext1' ///
+>         , ///
+>         xtitle("Activation [%]") ytitle("EMG LG [ln(mV)]") legend(off) aspect(1) name(all_`var', replace)
+ 14.     }
+ 15.     graph export all_`var'.tif, width(1200) height(900) replace
+ 16. 
+.     local graphtext1 = ""
+ 17.     
+. 
+.     * Fit a linear mixed model with random slopes to the logged EMG data, and graph the fitted data.
+.     
+.     display _n _n in green "ANALYSIS OF: " "`var'"
+ 18. 
+.     xtmixed `var' activations || subjectGroup: activations, cov(unstructured) 
+ 19.     estat icc
+ 20.     mltrsq
+ 21.     
+.     quietly {
+ 22.       * get mean slope and 95% CI
+.       predict mixedPred
+ 23.       predict mixedSE, stdp
+ 24.       generate mixedLCL = mixedPred - invnormal(0.975) * mixedSE
+ 25.       generate mixedUCL = mixedPred + invnormal(0.975) * mixedSE
+ 26.       * get 95% prediction interval
+.       generate mixedLPL = mixedPred - invnormal(0.975) * mixedSE * sqrt(24) /* 1 subject dropped, values >4 SD from mean */
+ 27.       generate mixedUPL = mixedPred + invnormal(0.975) * mixedSE * sqrt(24)
+ 28.     }
+ 29.     
+.       forvalues subject = 1/25 { 
+ 30.           local graphtext2 `graphtext2' (line `var' activations if subjectGroup == `subject', lpattern(solid) lcolor(gs10))
+ 31.           local graphtext2_ `graphtext2_' (line activations `var' if subjectGroup == `subject', lpattern(solid) lcolor(gs10))
+ 32.       }
+ 33.       sort activations
+ 34. 
+.       if `var' == torques {
+ 35.         twoway `graphtext2_', ///
+>           xtitle("Torque [%MVC]") ytitle("Activation [%]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
+ 36.           graph export torques.tif, width(1200) height(900) replace
+ 37.           graph export torques.eps, replace
+ 38.       }
+ 39.       if `var' == lnemgso {
+ 40.         /*
+>         twoway `graphtext2' ///
+>           (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
+>           (line mixedPred activations, lpattern(solid)) ///
+>           , ///
+>           xtitle("Activation [%]") ytitle("EMG SO [ln(mV)]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
+>           graph export mixed_`var'.tif, width(1200) height(900) replace
+>         */
+.         twoway (rarea mixedLPL mixedUPL activations, astyle(sunflowerlb)) /// /* 95% PI */
+>           (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
+>           (line mixedPred activations, lpattern(solid)) ///
+>           , ///
+>           xtitle("Activation [%]") ytitle("EMG SO [ln(mV)]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
+ 41.           graph export mixed_`var'.tif, width(1200) height(900) replace
+ 42.         
+.       }
+ 43.       if `var' == lnemgmg {
+ 44.         /*
+>         twoway `graphtext2' ///
+>           (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
+>           (line mixedPred activations, lpattern(solid)) ///
+>           , ///
+>           xtitle("Activation [%]") ytitle("EMG MG [ln(mV)]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
+>           graph export mixed_`var'.tif, width(1200) height(900) replace
+>         */
+.         twoway (rarea mixedLPL mixedUPL activations, astyle(sunflowerlb)) /// 
+>           (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
+>           (line mixedPred activations, lpattern(solid)) ///
+>           , ///
+>           xtitle("Activation [%]") ytitle("EMG MG [ln(mV)]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
+ 45.           graph export mixed_`var'.tif, width(1200) height(900) replace
+ 46.         
+.       }
+ 47.       if `var' == lnemglg {
+ 48.         /*
+>         twoway `graphtext2' ///
+>           (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
+>           (line mixedPred activations, lpattern(solid)) ///
+>           , ///
+>           xtitle("Activation [%]") ytitle("EMG LG [ln(mV)]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
+>           graph export mixed_`var'.tif, width(1200) height(900) replace
+>         */
+.         twoway (rarea mixedLPL mixedUPL activations, astyle(sunflowerlb)) /// 
+>           (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
+>           (line mixedPred activations, lpattern(solid)) ///
+>           , ///
+>           xtitle("Activation [%]") ytitle("EMG LG [ln(mV)]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
+ 49.           graph export mixed_`var'.tif, width(1200) height(900) replace
+ 50.         
+.       } 
+ 51. 
+.     * List model predictions.
+. 
+.     preserve
+ 52.         drop activations
+ 53.         egen activations = seq() in 1/11, from(0)
+ 54.         replace  activations = activations * 10
+ 55.         predict newPred
+ 56.         predict newSE, stdp
+ 57.         generate newLCL = newPred - invnormal(0.975) * newSE
+ 58.         generate newUCL = newPred + invnormal(0.975) * newSE
+ 59.         noisily list activations newPred newLCL newUCL in 1/11, noobs sep(0)
+ 60.     restore
+ 61.     drop mixedPred mixedSE mixedLCL mixedUCL mixedLPL mixedUPL
+ 62.     
+.     /*
+>     
+>     * Fit FP with robust SEs and extract predicted values. Show plot of fit.
+> 
+>     mfp: regress `var' activations, cluster(subject)
+>     quietly {
+>         predict fracpred
+>         predict fracSE, stdp
+>         generate LCL = fracpred - invnormal(0.975) * fracSE
+>         generate UCL = fracpred + invnormal(0.975) * fracSE
+>     }
+>     di "`graphtext2'"
+>     sort activations
+> 
+>     if `var' == torques {
+>       twoway `graphtext2_', ///
+>         xtitle("Torque (%MVC)") ytitle("Activation (%)") legend(off) aspect(1) name(frac_`var', replace)
+>         * graph export frac_`var'.tif, width(1200) height(900) replace
+>     }
+>     if `var' == emgso {
+>       twoway (rarea LCL UCL activations, astyle(sunflowerdb)) ///
+>         `graphtext2' ///
+>         (line fracpred activations, lpattern(solid) lcolor(black)) ///
+>         , ///
+>         xtitle("Activation (%)") ytitle("EMG SO (mV)") legend(off) aspect(1) name(frac_`var', replace)
+>         graph export frac_`var'.tif, width(1200) height(900) replace
+>     }
+>     if `var' == emgmg {
+>       twoway (rarea LCL UCL activations, astyle(sunflowerdb)) ///
+>         `graphtext2' ///
+>         (line fracpred activations, lpattern(solid) lcolor(black)) ///
+>         , ///
+>         xtitle("Activation (%)") ytitle("EMG MG (mV)") legend(off) aspect(1) name(frac_`var', replace)
+>         graph export frac_`var'.tif, width(1200) height(900) replace
+>     }
+>     if `var' == emglg {
+>       twoway (rarea LCL UCL activations, astyle(sunflowerdb)) ///
+>         `graphtext2' ///
+>         (line fracpred activations, lpattern(solid) lcolor(black)) ///
+>         , ///
+>         xtitle("Activation (%)") ytitle("EMG LG (mV)") legend(off) aspect(1) name(frac_`var', replace)
+>         graph export frac_`var'.tif, width(1200) height(900) replace
+>     }
+>     
+>     drop fracpred fracSE LCL UCL
+>     */
+.     
+.     local graphtext2 = ""
+ 63.     local graphtext2_ = ""
+ 64.     
+.   }
+(file all_torques.tif written in TIFF format)
+
+
+ANALYSIS OF: torques
+
+Performing EM optimization: 
+
+Performing gradient-based optimization: 
+
+Iteration 0:   log likelihood = -869.75513  
+Iteration 1:   log likelihood = -869.36424  
+Iteration 2:   log likelihood = -869.24811  
+Iteration 3:   log likelihood = -869.24296  
+Iteration 4:   log likelihood = -869.24287  
+
+Computing standard errors:
+
+Mixed-effects ML regression                     Number of obs      =       250
+Group variable: subjectGroup                    Number of groups   =        25
+
+                                                Obs per group: min =        10
+                                                               avg =      10.0
+                                                               max =        10
+
+
+                                                Wald chi2(1)       =   1077.66
+Log likelihood = -869.24287                     Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+     torques |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ activations |   1.006494   .0306598    32.83   0.000     .9464016    1.066586
+       _cons |  -.9951851   .7899034    -1.26   0.208    -2.543367     .552997
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+  Random-effects Parameters  |   Estimate   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+subjectGroup: Unstructured   |
+                sd(activa~s) |   .1418854   .0234239      .1026627    .1960933
+                   sd(_cons) |   2.012237   .7478945      .9712034    4.169154
+        corr(activa~s,_cons) |          1   .0000396            -1           1
+-----------------------------+------------------------------------------------
+                sd(Residual) |   6.690624   .3154624      6.100038    7.338388
+------------------------------------------------------------------------------
+LR test vs. linear regression:       chi2(3) =   209.19   Prob > chi2 = 0.0000
+
+Note: LR test is conservative and provided only for reference.
+
+Conditional intraclass correlation
+
+------------------------------------------------------------------------------
+                       Level |        ICC   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+                subjectGroup |   .0829503   .0570211      .0203903    .2821651
+------------------------------------------------------------------------------
+Note: ICC is conditional on zero values of random-effects covariates.
+Level 2 variable is subjectGroup 
+ 
+ 
+Calculating R-squared for the parameters of
+ activations and _cons
+  
+Model needs to be recalculated without random slopes to estimate R-squared values
+this may take some time...
+   
+   
+Number of macro-units:    25
+   
+   
+Snijders/Bosker R-squared Level 1:  0.9028
+Snijders/Bosker R-squared Level 2:  0.4831
+   
+Bryk/Raudenbush R-squared Level 1:  0.9494
+Bryk/Raudenbush R-squared Level 2:  -1.6e+22
+(file torques.tif written in TIFF format)
+(file torques.eps written in EPS format)
+(239 missing values generated)
+(10 real changes made)
+(option xb assumed)
+(239 missing values generated)
+(239 missing values generated)
+(239 missing values generated)
+(239 missing values generated)
+
+  +---------------------------------------------+
+  | activa~s     newPred      newLCL     newUCL |
+  |---------------------------------------------|
+  |        0   -.9951851   -2.543367    .552997 |
+  |       10    9.069753    7.291706    10.8478 |
+  |       20    19.13469    16.97871   21.29067 |
+  |       30    29.19963    26.58099   31.81827 |
+  |       40    39.26457    36.13591   42.39322 |
+  |       50    49.32951    45.66319   52.99583 |
+  |       60    59.39444    55.17336   63.61553 |
+  |       70    69.45938    64.67237   74.24639 |
+  |       80    79.52431    74.16376   84.88486 |
+  |       90    89.58926    83.64974   95.52877 |
+  |      100     99.6542    93.13175   106.1766 |
+  +---------------------------------------------+
+(file all_lnemgso.tif written in TIFF format)
+
+
+ANALYSIS OF: lnemgso
+
+Performing EM optimization: 
+
+Performing gradient-based optimization: 
+
+Iteration 0:   log likelihood = -137.05809  
+Iteration 1:   log likelihood = -137.05809  
+
+Computing standard errors:
+
+Mixed-effects ML regression                     Number of obs      =       250
+Group variable: subjectGroup                    Number of groups   =        25
+
+                                                Obs per group: min =        10
+                                                               avg =      10.0
+                                                               max =        10
+
+
+                                                Wald chi2(1)       =    737.79
+Log likelihood = -137.05809                     Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+     lnemgso |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ activations |   .0271955   .0010012    27.16   0.000     .0252332    .0291579
+       _cons |  -5.314455   .0844523   -62.93   0.000    -5.479979   -5.148932
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+  Random-effects Parameters  |   Estimate   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+subjectGroup: Unstructured   |
+                sd(activa~s) |   .0038757   .0009159      .0024388     .006159
+                   sd(_cons) |   .3790253    .066341      .2689565    .5341392
+        corr(activa~s,_cons) |  -.7617332   .1231483     -.9178706   -.4014067
+-----------------------------+------------------------------------------------
+                sd(Residual) |    .366052   .0183035      .3318797    .4037429
+------------------------------------------------------------------------------
+LR test vs. linear regression:       chi2(3) =    64.47   Prob > chi2 = 0.0000
+
+Note: LR test is conservative and provided only for reference.
+
+Conditional intraclass correlation
+
+------------------------------------------------------------------------------
+                       Level |        ICC   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+                subjectGroup |   .5174067   .0924553      .3416251    .6889833
+------------------------------------------------------------------------------
+Note: ICC is conditional on zero values of random-effects covariates.
+Level 2 variable is subjectGroup 
+ 
+ 
+Calculating R-squared for the parameters of
+ activations and _cons
+  
+Model needs to be recalculated without random slopes to estimate R-squared values
+this may take some time...
+   
+   
+Number of macro-units:    25
+   
+   
+Snijders/Bosker R-squared Level 1:  0.8160
+Snijders/Bosker R-squared Level 2:  0.3059
+   
+Bryk/Raudenbush R-squared Level 1:  0.8727
+Bryk/Raudenbush R-squared Level 2:  -1.2e+21
+(file mixed_lnemgso.tif written in TIFF format)
+(239 missing values generated)
+(10 real changes made)
+(option xb assumed)
+(239 missing values generated)
+(239 missing values generated)
+(239 missing values generated)
+(239 missing values generated)
+
+  +----------------------------------------------+
+  | activa~s     newPred      newLCL      newUCL |
+  |----------------------------------------------|
+  |        0   -5.314456   -5.479979   -5.148932 |
+  |       10     -5.0425    -5.19392    -4.89108 |
+  |       20   -4.770545   -4.909211   -4.631879 |
+  |       30    -4.49859   -4.626256   -4.370924 |
+  |       40   -4.226635   -4.345544   -4.107726 |
+  |       50    -3.95468   -4.067596   -3.841763 |
+  |       60   -3.682725   -3.792866   -3.572584 |
+  |       70   -3.410769   -3.521594   -3.299945 |
+  |       80   -3.138814    -3.25372   -3.023909 |
+  |       90   -2.866859   -2.988904   -2.744815 |
+  |      100   -2.594904   -2.726648   -2.463161 |
+  +----------------------------------------------+
+(file all_lnemgmg.tif written in TIFF format)
+
+
+ANALYSIS OF: lnemgmg
+
+Performing EM optimization: 
+
+Performing gradient-based optimization: 
+
+Iteration 0:   log likelihood = -73.903386  
+Iteration 1:   log likelihood = -73.903386  
+
+Computing standard errors:
+
+Mixed-effects ML regression                     Number of obs      =       240
+Group variable: subjectGroup                    Number of groups   =        24
+
+                                                Obs per group: min =        10
+                                                               avg =      10.0
+                                                               max =        10
+
+
+                                                Wald chi2(1)       =    341.51
+Log likelihood = -73.903386                     Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+     lnemgmg |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ activations |   .0250428   .0013551    18.48   0.000     .0223868    .0276988
+       _cons |  -5.511724   .0853287   -64.59   0.000    -5.678965   -5.344483
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+  Random-effects Parameters  |   Estimate   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+subjectGroup: Unstructured   |
+                sd(activa~s) |   .0062441   .0010202      .0045331    .0086009
+                   sd(_cons) |   .3969122   .0634501      .2901495     .542959
+        corr(activa~s,_cons) |  -.6807163   .1212165     -.8546565   -.3693911
+-----------------------------+------------------------------------------------
+                sd(Residual) |   .2593214   .0132312      .2346432     .286595
+------------------------------------------------------------------------------
+LR test vs. linear regression:       chi2(3) =   153.31   Prob > chi2 = 0.0000
+
+Note: LR test is conservative and provided only for reference.
+
+Conditional intraclass correlation
+
+------------------------------------------------------------------------------
+                       Level |        ICC   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+                subjectGroup |   .7008385   .0710418      .5466605    .8198603
+------------------------------------------------------------------------------
+Note: ICC is conditional on zero values of random-effects covariates.
+Level 2 variable is subjectGroup 
+ 
+ 
+Calculating R-squared for the parameters of
+ activations and _cons
+  
+Model needs to be recalculated without random slopes to estimate R-squared values
+this may take some time...
+   
+   
+Number of macro-units:    24
+   
+   
+Snijders/Bosker R-squared Level 1:  0.8087
+Snijders/Bosker R-squared Level 2:  0.1326
+   
+Bryk/Raudenbush R-squared Level 1:  0.8838
+Bryk/Raudenbush R-squared Level 2:  -5.6e+07
+(file mixed_lnemgmg.tif written in TIFF format)
+(239 missing values generated)
+(10 real changes made)
+(option xb assumed)
+(239 missing values generated)
+(239 missing values generated)
+(239 missing values generated)
+(239 missing values generated)
+
+  +----------------------------------------------+
+  | activa~s     newPred      newLCL      newUCL |
+  |----------------------------------------------|
+  |        0   -5.511724   -5.678965   -5.344483 |
+  |       10   -5.261296    -5.41142   -5.111171 |
+  |       20   -5.010868   -5.146941   -4.874794 |
+  |       30    -4.76044   -4.886558   -4.634322 |
+  |       40   -4.510012    -4.63128   -4.388743 |
+  |       50   -4.259583    -4.38172   -4.137447 |
+  |       60   -4.009156   -4.137762   -3.880549 |
+  |       70   -3.758728    -3.89863   -3.618825 |
+  |       80     -3.5083   -3.663273   -3.353327 |
+  |       90   -3.257872   -3.430705   -3.085038 |
+  |      100   -3.007443   -3.200154   -2.814733 |
+  +----------------------------------------------+
+(file all_lnemglg.tif written in TIFF format)
+
+
+ANALYSIS OF: lnemglg
+
+Performing EM optimization: 
+
+Performing gradient-based optimization: 
+
+Iteration 0:   log likelihood = -80.265904  
+Iteration 1:   log likelihood = -80.265904  
+
+Computing standard errors:
+
+Mixed-effects ML regression                     Number of obs      =       250
+Group variable: subjectGroup                    Number of groups   =        25
+
+                                                Obs per group: min =        10
+                                                               avg =      10.0
+                                                               max =        10
+
+
+                                                Wald chi2(1)       =    687.76
+Log likelihood = -80.265904                     Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+     lnemglg |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ activations |   .0277987     .00106    26.23   0.000     .0257212    .0298763
+       _cons |  -5.827858   .0658869   -88.45   0.000    -5.956994   -5.698722
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+  Random-effects Parameters  |   Estimate   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+subjectGroup: Unstructured   |
+                sd(activa~s) |   .0047215    .000844       .003326    .0067025
+                   sd(_cons) |   .2976843   .0518013       .211658    .4186751
+        corr(activa~s,_cons) |  -.6115012   .1520201     -.8297178   -.2311475
+-----------------------------+------------------------------------------------
+                sd(Residual) |   .2773501   .0138667      .2514611    .3059044
+------------------------------------------------------------------------------
+LR test vs. linear regression:       chi2(3) =    97.12   Prob > chi2 = 0.0000
+
+Note: LR test is conservative and provided only for reference.
+
+Conditional intraclass correlation
+
+------------------------------------------------------------------------------
+                       Level |        ICC   Std. Err.     [95% Conf. Interval]
+-----------------------------+------------------------------------------------
+                subjectGroup |   .5353176    .091642      .3588044    .7034058
+------------------------------------------------------------------------------
+Note: ICC is conditional on zero values of random-effects covariates.
+Level 2 variable is subjectGroup 
+ 
+ 
+Calculating R-squared for the parameters of
+ activations and _cons
+  
+Model needs to be recalculated without random slopes to estimate R-squared values
+this may take some time...
+   
+   
+Number of macro-units:    25
+   
+   
+Snijders/Bosker R-squared Level 1:  0.8656
+Snijders/Bosker R-squared Level 2:  0.4660
+   
+Bryk/Raudenbush R-squared Level 1:  0.9100
+Bryk/Raudenbush R-squared Level 2:  -4.1e+21
+(file mixed_lnemglg.tif written in TIFF format)
+(239 missing values generated)
+(10 real changes made)
+(option xb assumed)
+(239 missing values generated)
+(239 missing values generated)
+(239 missing values generated)
+(239 missing values generated)
+
+  +----------------------------------------------+
+  | activa~s     newPred      newLCL      newUCL |
+  |----------------------------------------------|
+  |        0   -5.827858   -5.956994   -5.698722 |
+  |       10   -5.549871   -5.666708   -5.433033 |
+  |       20   -5.271884   -5.379072   -5.164696 |
+  |       30   -4.993896   -5.094845   -4.892948 |
+  |       40   -4.715909   -4.814679    -4.61714 |
+  |       50   -4.437922   -4.538835   -4.337009 |
+  |       60   -4.159935   -4.267055   -4.052815 |
+  |       70   -3.881948   -3.998692   -3.765204 |
+  |       80   -3.603961   -3.732983   -3.474938 |
+  |       90   -3.325974   -3.469249   -3.182698 |
+  |      100   -3.047986   -3.206958   -2.889014 |
+  +----------------------------------------------+
+
+. 
+.   graph combine all_emgso all_lnemgso mixed_lnemgso ///
+>                 all_emgmg all_lnemgmg mixed_lnemgmg ///
+>                 all_emglg all_lnemglg mixed_lnemglg ///
+>         , ///
+>         rows(3) ysize(12) xsize(12) name(all_mixed, replace) 
+
+.   graph export all_mixed.tif, width(4800) replace
+(file all_mixed.tif written in TIFF format)
+
+.   graph export all_mixed.eps, replace
+(file all_mixed.eps written in EPS format)
+
+. 
+.   graph drop all_torques all_emgso all_emgmg all_emglg
+
+.   graph drop all_lnemgso all_lnemgmg all_lnemglg 
+
+.   graph drop each_torques each_emgso each_emglg each_emgmg
+
+. 
+.   graph drop mixed_torques mixed_lnemgso mixed_lnemgmg mixed_lnemglg 
+
+.   *graph drop frac_torques frac_emgso frac_emgmg frac_emglg
+.   graph drop all_mixed
+
+.         
+. 
+.     ********** END ********** 
+. 
+.         
+.         
+.   log close
+      name:  <unnamed>
+       log:  /home/joanna/Dropbox/Projects/activation/src/code/stats/log_files/Log  6 Oct 2020 09h41m37s.log
+  log type:  text
+ closed on:   6 Oct 2020, 09:43:20
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

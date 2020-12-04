@@ -1,0 +1,1020 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>spike2py &#8212; spike2py 0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">spike2py 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for spike2py</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">sio</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="k">import</span> <span class="n">butter</span><span class="p">,</span> <span class="n">filtfilt</span>
+
+
+<div class="viewcode-block" id="Signal"><a class="viewcode-back" href="../api.html#spike2py.Signal">[docs]</a><span class="k">class</span> <span class="nc">Signal</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Signal object</span>
+
+<span class="sd">    Signal and accompanying information. Most often this is a signal recorded</span>
+<span class="sd">    using Spike2, but can also be an external signal that needs to be</span>
+<span class="sd">    processed alongside the signal recorded with Spike2.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sig : np.array or list or list of lists</span>
+<span class="sd">        When used in the context of the `Trial` class and a signal recorded</span>
+<span class="sd">        in Spike2, `sig` will be the signal obtained from the imported Matlab</span>
+<span class="sd">        file. The signal is obtained from `data[s2name]`, where `s2name` is the</span>
+<span class="sd">        name of the Spike2 channel. If using with a signal not recorded in</span>
+<span class="sd">        Spike2, `sig` will be either the signal on its own, or the signal and an</span>
+<span class="sd">        accompanying time axis. `sig` = [`signal`, `times`]  where `times` is</span>
+<span class="sd">        optional.</span>
+<span class="sd">    stype : str</span>
+<span class="sd">        Signal type. `external`: signal not recorded by Spike2 but needed for analysis.</span>
+<span class="sd">        `waveform` : signal sampled at regular intervals. `trig` : trigger signal</span>
+<span class="sd">        `sEMG` : surface EMG signal</span>
+<span class="sd">    s2name : str</span>
+<span class="sd">        Spike2 channel name</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Informative name for signal</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    fs : int, optional</span>
+<span class="sd">        Sampling frequency of signal. If `times` is not present, `fs` is used</span>
+<span class="sd">        to create a time axis for the signal.</span>
+<span class="sd">    filtInfo : FiltInfo, optional</span>
+<span class="sd">        Contains filter information</span>
+<span class="sd">    calibInfo : CalibInfo, optional</span>
+<span class="sd">        Contains calibration information</span>
+<span class="sd">    offsetInfo : OffsetInfo, optional</span>
+<span class="sd">        Contains offset information</span>
+<span class="sd">    normInfo : NormInfo, option</span>
+<span class="sd">        Contains normalization information</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">stype</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">filtInfo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">calibInfo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offsetInfo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normInfo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">=</span> <span class="n">stype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s2name</span> <span class="o">=</span> <span class="n">s2name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="n">fs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">envel</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span> <span class="o">=</span> <span class="n">filtInfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calibInfo</span> <span class="o">=</span> <span class="n">calibInfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span> <span class="o">=</span> <span class="n">offsetInfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span> <span class="o">=</span> <span class="n">normInfo</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_raw_values</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_times</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_proc_raw_values</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Signal(signal=signal, name={repr(self.name)}, s2name={repr(self.s2name)}, &quot;</span>
+               <span class="n">f</span><span class="s2">&quot;stype={repr(self.stype)})&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_raw_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="ow">is</span> <span class="s1">&#39;external&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">signal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">signal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">signal</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">signal</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="ow">is</span> <span class="s1">&#39;waveform&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="ow">is</span> <span class="s1">&#39;sEMG&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">signal</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">signal</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">signal</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_add_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="ow">is</span> <span class="s1">&#39;trig&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="n">signal</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="ow">is</span> <span class="s1">&#39;external&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="n">signal</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">signal</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">signal</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_times</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="ow">is</span> <span class="s1">&#39;waveform&#39;</span> <span class="ow">or</span> <span class="s1">&#39;sEMG&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_times</span><span class="p">(</span><span class="n">fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="n">len_signal</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_proc_raw_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s1">&#39;trig&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibInfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibInfo</span><span class="o">.</span><span class="n">slope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">calibrate</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">remove_offset</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span><span class="o">.</span><span class="n">cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="ow">is</span> <span class="s1">&#39;sEMG&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">envelop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_new_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">len_signal</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Generate new time axis.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fs : int or float</span>
+<span class="sd">            Sampling frequency</span>
+<span class="sd">        len_signal : int</span>
+<span class="sd">            Number of samples for new time axis</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        times : np.array</span>
+<span class="sd">            Newly created time axis</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">fs</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">len_signal</span><span class="p">):</span>
+            <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="n">step</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Signal.remove_offset"><a class="viewcode-back" href="../api.html#spike2py.Signal.remove_offset">[docs]</a>    <span class="k">def</span> <span class="nf">remove_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sig</span><span class="o">=</span><span class="s1">&#39;proc&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove offset from signal.</span>
+
+<span class="sd">        Done when signal first created if `offsetInfo` parameter provided.</span>
+<span class="sd">        However, it can be performed after the signal has been created if the</span>
+<span class="sd">        `type` and `val` parameters are provided; `offsetInfo` will be added to</span>
+<span class="sd">        signal.</span>
+
+<span class="sd">        By default offset is removed from `proc` signal. However,</span>
+<span class="sd">        if sig=`raw`, then the offset will be removed from the raw signal and</span>
+<span class="sd">        the results stored in `proc`. if sig=`rect`, then the offset will be</span>
+<span class="sd">        removed from the `rect` signals and the results stored in `rect`.</span>
+
+<span class="sd">        See `OffsetInfo` for details on `type`, `val` and `sig`.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        If an offset is removed from an EMG signal when first imported, then the</span>
+<span class="sd">        mean of the `proc` version of the EMG signal will not be removed. It is</span>
+<span class="sd">        assumed that the user has provided offset details that replicate this step</span>
+<span class="sd">        or remove the offsets from only a portion of the trial (e.g. only the</span>
+<span class="sd">        first 5s to avoid the influence of a stimulation artifact.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">type_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span> <span class="o">=</span> <span class="n">OffsetInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="n">val</span><span class="p">,</span> <span class="n">sig</span><span class="o">=</span><span class="n">sig</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="s1">&#39;val&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">sig</span> <span class="ow">is</span> <span class="s1">&#39;proc&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">val</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">sig</span> <span class="ow">is</span> <span class="s1">&#39;raw&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">val</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">sig</span> <span class="ow">is</span> <span class="s1">&#39;rect&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">val</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Offset signal </span><span class="si">{self.sig}</span><span class="s1"> not recognized.&#39;</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">sig</span> <span class="ow">is</span> <span class="s1">&#39;proc&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">sig</span> <span class="ow">is</span> <span class="s1">&#39;raw&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">sig</span> <span class="ow">is</span> <span class="s1">&#39;rect&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Offset signal </span><span class="si">{self.sig}</span><span class="s1"> not recognized.&#39;</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">sig</span> <span class="ow">is</span> <span class="s1">&#39;proc&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">val</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">sig</span> <span class="ow">is</span> <span class="s1">&#39;raw&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">val</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">sig</span> <span class="ow">is</span> <span class="s1">&#39;rect&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span><span class="o">.</span><span class="n">val</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Offset signal </span><span class="si">{self.sig}</span><span class="s1"> not recognized.&#39;</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Offset type </span><span class="si">{type_}</span><span class="s1"> not recognized.&#39;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Signal.filter"><a class="viewcode-back" href="../api.html#spike2py.Signal.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Filter signal.</span>
+
+<span class="sd">        Done when signal first created if `filtInfo` parameter provided.</span>
+<span class="sd">        However, it can also be performed after the signal has been created if</span>
+<span class="sd">        the `cutoff`, `order` and `type` parameters are provided. `filtInfo`</span>
+<span class="sd">        will be added to sig.</span>
+
+<span class="sd">        See `FiltInfo` for details on `cutoff`, `order` and `type`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="n">order</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span> <span class="o">=</span> <span class="n">FiltInfo</span><span class="p">(</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">type_</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span><span class="o">.</span><span class="n">order</span>
+        <span class="k">if</span> <span class="n">cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">Wn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cutoff</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Wn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span><span class="o">.</span><span class="n">cutoff</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">type_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+                          <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span>
+                          <span class="n">btype</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span>
+                          <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+                          <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span>
+                          <span class="n">btype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                          <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="n">filtfilt</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Signal.calibrate"><a class="viewcode-back" href="../api.html#spike2py.Signal.calibrate">[docs]</a>    <span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calibrate signal.</span>
+
+<span class="sd">        Done when signal first created if `calibInfo` parameter provided.</span>
+<span class="sd">        However, it can also be performed after the signal has been created if</span>
+<span class="sd">        the `slope` and `offset` parameters are provided. `calibInfo` will be</span>
+<span class="sd">        added to sig.</span>
+
+<span class="sd">        See `CalibInfo` for details on `slope` and `offset`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">slope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">slope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibInfo</span><span class="o">.</span><span class="n">slope</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibInfo</span><span class="o">.</span><span class="n">offset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calibInfo</span> <span class="o">=</span> <span class="n">CalibInfo</span><span class="p">(</span><span class="n">slope</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">*</span> <span class="n">slope</span><span class="p">)</span> <span class="o">-</span> <span class="n">offset</span></div>
+
+<div class="viewcode-block" id="Signal.normalize"><a class="viewcode-back" href="../api.html#spike2py.Signal.normalize">[docs]</a>    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">signal_version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Normalize signal.</span>
+
+<span class="sd">        Done when signal first created if `normInfo` parameter provided.</span>
+<span class="sd">        However, it can also be performed after the signal has been created.</span>
+<span class="sd">        `normInfo` will be added to sig.</span>
+
+<span class="sd">        See `normInfo` for details on `type`, `value` and `sig_version`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">type_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">signal_version</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="n">signal_version</span> <span class="o">=</span> <span class="p">[</span><span class="n">signal_version</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span> <span class="o">=</span> <span class="n">NormInfo</span><span class="p">(</span><span class="n">type_</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span>
+                                     <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
+                                     <span class="n">sig_version</span><span class="o">=</span><span class="n">signal_version</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;percentage&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> \
+                    <span class="s1">&#39;_extract_data&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+            <span class="k">if</span> <span class="s1">&#39;raw&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+            <span class="k">if</span> <span class="s1">&#39;rect&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+            <span class="k">if</span> <span class="s1">&#39;envel&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">envel</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">envel</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">envel</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+            <span class="k">if</span> <span class="s1">&#39;interp&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">interp_sig</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;interp_sig&#39;</span><span class="p">,</span> <span class="s1">&#39;times fs vals&#39;</span><span class="p">)</span>
+                <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                    <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">vals</span><span class="p">)</span>
+                    <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">vals</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+                    <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">times</span>
+                    <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">fs</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;norm_100&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp_sig</span><span class="p">(</span><span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span>
+                                                               <span class="n">fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span>
+                                                               <span class="n">vals</span><span class="o">=</span><span class="n">vals</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;proportion&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="s1">&#39;_extract_data&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;raw&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;rect&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;envel&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">envel</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">envel</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">envel</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;interp&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">Interp_sig</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Interp_sig&#39;</span><span class="p">,</span> <span class="s1">&#39;times fs vals&#39;</span><span class="p">)</span>
+                <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                    <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">vals</span><span class="p">)</span>
+                    <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">vals</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span>
+                    <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">times</span>
+                    <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">fs</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;norm_100&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Interp_sig</span><span class="p">(</span><span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span>
+                                                               <span class="n">fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span>
+                                                               <span class="n">vals</span><span class="o">=</span><span class="n">vals</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="s1">&#39;_extract_data&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+            <span class="k">if</span> <span class="s1">&#39;raw&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+            <span class="k">if</span> <span class="s1">&#39;rect&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+            <span class="k">if</span> <span class="s1">&#39;envel&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">envel</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">envel</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+            <span class="k">if</span> <span class="s1">&#39;interp&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">sig_version</span><span class="p">:</span>
+                <span class="n">interp_sig</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;interp_sig&#39;</span><span class="p">,</span> <span class="s1">&#39;times fs vals&#39;</span><span class="p">)</span>
+                <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                    <span class="n">max_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">.</span><span class="n">value</span>
+                    <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">vals</span> <span class="o">/</span> <span class="n">max_val</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+                    <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">times</span>
+                    <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">fs</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;norm_100&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp_sig</span><span class="p">(</span><span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span>
+                                                               <span class="n">fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span>
+                                                               <span class="n">vals</span><span class="o">=</span><span class="n">vals</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Unrecognized Normalization type &lt;</span><span class="si">{type_}</span><span class="s1">&gt;.&#39;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Signal.envelop"><a class="viewcode-back" href="../api.html#spike2py.Signal.envelop">[docs]</a>    <span class="k">def</span> <span class="nf">envelop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a signal envelop for sEMG.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cutoff : int, default 5</span>
+<span class="sd">            Cutoff frequency for lowpass filter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                      <span class="n">Wn</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cutoff</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                      <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span>
+                      <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">envel</span> <span class="o">=</span> <span class="n">filtfilt</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Signal.interpolate"><a class="viewcode-back" href="../api.html#spike2py.Signal.interpolate">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">signal_id</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">old_x</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Linear interpolation of signal.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            name to give to new interpolated signal</span>
+<span class="sd">        sig_id: str</span>
+<span class="sd">            Select which values to interpolation (e.g. &#39;raw&#39; or &#39;proc&#39;).</span>
+<span class="sd">        subset : list of two int and one bool, optional</span>
+<span class="sd">            Index values to subset signal and True/False of whether or not to</span>
+<span class="sd">            zero new x-axis</span>
+<span class="sd">        new_x: np.array (optional)</span>
+<span class="sd">            If provided, directly used as the new_x to interp values</span>
+<span class="sd">        new_fs: int (optional)</span>
+<span class="sd">            If provided, new_x generated based on new sampling fq</span>
+<span class="sd">        old_x: np.array (optional, default is self.times)</span>
+<span class="sd">            If provided, used as the old_x</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &gt;&gt;&gt; import spike2py</span>
+
+<span class="sd">        Interpolate to a new sampling rate</span>
+
+<span class="sd">        &gt;&gt;&gt; trial.sig[&#39;torque&#39;].interpolate(name=&#39;fs15&#39;, signal_id=&#39;proc&#39;, new_fs=15)</span>
+
+<span class="sd">        Interpolate to a new x-axis</span>
+
+<span class="sd">        &gt;&gt;&gt; new_x = list(range(len(trial.sig[&#39;torque&#39;].raw_vals)))</span>
+<span class="sd">        &gt;&gt;&gt; trial.sig[&#39;torque&#39;].interpolate(name=&#39;interpolate&#39;, signal_id=&#39;raw&#39;, new_x=new_x)</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        Can provide `new_x` to interpolate values to this new x-axis or times,</span>
+<span class="sd">        or `fs` to interpolate to a new x-axis created with a sampling rate of</span>
+<span class="sd">        `fs` Hz.</span>
+
+<span class="sd">        The default x-axis for the original (pre-interpolation) signal is</span>
+<span class="sd">        `self.times`; however, a different `old_x` can be specified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">subset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">subset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">signal_id</span> <span class="ow">is</span> <span class="s1">&#39;raw&#39;</span><span class="p">:</span>
+            <span class="n">old_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">subset</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">subset</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">elif</span> <span class="n">signal_id</span> <span class="ow">is</span> <span class="s1">&#39;proc&#39;</span><span class="p">:</span>
+            <span class="n">old_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">[</span><span class="n">subset</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">subset</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Interpolate sign_id </span><span class="si">{signal_id}</span><span class="s2"> not recognized.&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">old_x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">old_x</span> <span class="o">=</span> <span class="n">old_x</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">old_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="n">subset</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">subset</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="n">new_x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_x</span> <span class="o">=</span> <span class="n">new_x</span>
+            <span class="n">new_fs</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">new_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">new_x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">new_fs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">[(</span><span class="n">subset</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span> <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">[(</span><span class="n">subset</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
+                              <span class="mi">1</span><span class="o">/</span><span class="n">new_fs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">subset</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">old_x</span> <span class="o">=</span> <span class="n">old_x</span> <span class="o">-</span> <span class="n">old_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">new_x</span> <span class="o">=</span> <span class="n">new_x</span> <span class="o">-</span> <span class="n">new_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">new_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">new_x</span><span class="p">,</span> <span class="n">xp</span><span class="o">=</span><span class="n">old_x</span><span class="p">,</span> <span class="n">fp</span><span class="o">=</span><span class="n">old_y</span><span class="p">)</span>
+        <span class="n">Interp_sig</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Interp_sig&#39;</span><span class="p">,</span> <span class="s1">&#39;times fs vals&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Interp_sig</span><span class="p">(</span><span class="n">times</span><span class="o">=</span><span class="n">new_x</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="n">new_fs</span><span class="p">,</span> <span class="n">vals</span><span class="o">=</span><span class="n">new_y</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Trial"><a class="viewcode-back" href="../api.html#spike2py.Trial">[docs]</a><span class="k">class</span> <span class="nc">Trial</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class for trial.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    trialInfo : TrialInfo</span>
+<span class="sd">        Class containing details about trial and its signals</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; import spike2py</span>
+
+<span class="sd">    &gt;&gt;&gt; trial_pc1 = spike2py.Trial(trial_info1)  # Assumes `trial_info1` available</span>
+
+<span class="sd">    &gt;&gt;&gt; trial_pc2 = spike2py.Trial(trial_info2)  # Assumes `trial_info2 available</span>
+<span class="sd">    &gt;&gt;&gt; trial_pc1.merge(&#39;pc2&#39;, trial_pc2)</span>
+
+<span class="sd">    &gt;&gt;&gt; us = spike2py.SigInfo(name=&#39;us&#39;, stype=&#39;external&#39;, fs=15)  # ultrasound</span>
+<span class="sd">    &gt;&gt;&gt; us_sig = spike2py.Signal(us_dat, stype=us.stype, name=us.name, fs=us.fs)</span>
+<span class="sd">    &gt;&gt;&gt; trial_pc1.add_sig(&#39;us&#39;, us_sig)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trialInfo</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cond</span> <span class="o">=</span> <span class="n">trialInfo</span><span class="o">.</span><span class="n">cond</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">trialInfo</span><span class="o">.</span><span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">trialInfo</span><span class="o">.</span><span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infoSignals</span> <span class="o">=</span> <span class="n">trialInfo</span><span class="o">.</span><span class="n">signals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sig</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_read_sig</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">txt</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="s2">&quot;Trial(path={repr(self.path)}, &quot;</span>
+              <span class="n">f</span><span class="s2">&quot;filename={repr(self.filename)}, &quot;</span>
+              <span class="n">f</span><span class="s2">&quot;cond={repr(self.cond)}, &quot;</span>
+              <span class="n">f</span><span class="s2">&quot;sig=sig)&quot;</span>
+              <span class="n">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"># signals in trial:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sig</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span> <span class="o">+</span> <span class="n">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">#</span><span class="se">\t</span><span class="s2"> </span><span class="si">{sig}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">txt</span>
+
+    <span class="k">def</span> <span class="nf">_read_sig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sig</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">infoSignals</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="n">sig</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Signal</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">sig</span><span class="o">.</span><span class="n">s2name</span><span class="p">],</span>
+                                        <span class="n">stype</span><span class="o">=</span><span class="n">sig</span><span class="o">.</span><span class="n">stype</span><span class="p">,</span>
+                                        <span class="n">name</span><span class="o">=</span><span class="n">sig</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                        <span class="n">fs</span><span class="o">=</span><span class="n">sig</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
+                                        <span class="n">s2name</span><span class="o">=</span><span class="n">sig</span><span class="o">.</span><span class="n">s2name</span><span class="p">,</span>
+                                        <span class="n">filtInfo</span><span class="o">=</span><span class="n">sig</span><span class="o">.</span><span class="n">filtInfo</span><span class="p">,</span>
+                                        <span class="n">calibInfo</span><span class="o">=</span><span class="n">sig</span><span class="o">.</span><span class="n">calibInfo</span><span class="p">,</span>
+                                        <span class="n">offsetInfo</span><span class="o">=</span><span class="n">sig</span><span class="o">.</span><span class="n">offsetInfo</span><span class="p">,</span>
+                                        <span class="p">)</span>
+
+<div class="viewcode-block" id="Trial.add_sig"><a class="viewcode-back" href="../api.html#spike2py.Trial.add_sig">[docs]</a>    <span class="k">def</span> <span class="nf">add_sig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig_name</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add signal.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sig_name : str</span>
+<span class="sd">            Short informative name for signal; will be key to retrieve</span>
+<span class="sd">            signal from `Trial.sig[key]`</span>
+<span class="sd">        sig : `Signal`, list, np.array, int, float, bool</span>
+<span class="sd">            Data associated with added signal</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        Designed to have `sig` be a `Signal` instance, but this implementation</span>
+<span class="sd">        provides flexibility to the user to add any type of signal or value.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="n">sig_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig</span></div>
+
+<div class="viewcode-block" id="Trial.merge"><a class="viewcode-back" href="../api.html#spike2py.Trial.merge">[docs]</a>    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Merge trials.</span>
+
+<span class="sd">        Adds all signals from another `Trial` instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trial: Trial</span>
+<span class="sd">            Trial containing signals to be merged</span>
+<span class="sd">        prefix : str, optional</span>
+<span class="sd">            Prefix to add to merged signal names. Default is `merged\_`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;merged_&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_sig</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">key</span><span class="p">,</span> <span class="n">vals</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SigInfo"><a class="viewcode-back" href="../api.html#spike2py.SigInfo">[docs]</a><span class="k">class</span> <span class="nc">SigInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Information to process signal recorded with Spike2.</span>
+
+<span class="sd">    Passed to spike2.TrialInfo.sig, which is a list of all sig,</span>
+<span class="sd">    or a single signal.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        User defined name, because Spike2 channel names are not always clear.</span>
+<span class="sd">    stype : str</span>
+<span class="sd">        Signal type. `external`for a signal not recorded by Spike2 but needed</span>
+<span class="sd">        for analysis. `waveform` for a signal sampled at regular intervals.</span>
+<span class="sd">        `trig` for a trigger signal. `sEMG` for a surface EMG signal.</span>
+<span class="sd">    s2name : str</span>
+<span class="sd">        Spike2 channel name.</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    fs : int, optional</span>
+<span class="sd">        Sampling frequency of signal; used when `stype` is `external`</span>
+<span class="sd">    filt_cutoff : int, optional</span>
+<span class="sd">        Value of filter</span>
+<span class="sd">        Either single value (e.g. 30) or list of 2 values (e.g. [20, 450])</span>
+<span class="sd">    filt_order: int, optional</span>
+<span class="sd">        Order of filter</span>
+<span class="sd">    filt_type : str, optional</span>
+<span class="sd">        Define type of filter: `lowpass`, `highpass`, `bandpass`, `bandstop`</span>
+<span class="sd">    calib_slope : float or int, optional</span>
+<span class="sd">        Slope of the calibration equation</span>
+<span class="sd">    calib_offset : float or int, optional</span>
+<span class="sd">        Offset of the calibration equation (i.e. intercept)</span>
+<span class="sd">    offset_type : str, optional</span>
+<span class="sd">        `val` to remove value provided. `mean` to remove mean of signal.</span>
+<span class="sd">        `start` to remove mean of n points from start of trial.</span>
+<span class="sd">    offset_val: int, optional</span>
+<span class="sd">        Value required for `val` and `start` offset removal types.</span>
+<span class="sd">    offset_sig: str, default &#39;proc&#39;</span>
+<span class="sd">        Specify which signal from which to remove offset</span>
+<span class="sd">        offset removal types.</span>
+<span class="sd">    norm_type: str, optional</span>
+<span class="sd">        Specify type of normalization to apply. Possibilities are</span>
+<span class="sd">        `percentage`: Signal will range from 0-100, based on maximum in signal</span>
+<span class="sd">        `proportional`: Signal will range from 0-1, based on maximum in signal</span>
+<span class="sd">        `value`: Signal will range from 0-100, based on maximum in signal</span>
+<span class="sd">    norm_val: float, optional</span>
+<span class="sd">        Value required for `value` normalization type.</span>
+<span class="sd">    norm_sig_version: str or list of str, optional</span>
+<span class="sd">        Possibilities include `raw`, `_extract_data`, `rect`, `envel`, `interp`.</span>
+<span class="sd">        Default is to use `_extract_data`. `interp` will apply normilization to all `interp` signals</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; import spike2py</span>
+
+<span class="sd">    &gt;&gt;&gt; gas = spike2py.SigInfo(name=&#39;gas&#39;, stype=&#39;sEMG&#39;, s2name=&#39;GAS&#39;,</span>
+<span class="sd">						filt_cutoff=5, filt_order=4, filt_type=&#39;lowpass&#39;,</span>
+<span class="sd">						calib_slope=0.5, calib_offset=55,</span>
+<span class="sd">						offset_type=&#39;val&#39;, offset_val=22, offset_sig=&#39;proc&#39;</span>
+<span class="sd">					   norm_type=&#39;percentage&#39;, norm_sig_version=[&#39;raw&#39;, &#39;_extract_data&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; gas</span>
+<span class="sd">    SigInfo(name=&#39;gas&#39;,</span>
+<span class="sd">		stype=&#39;sEMG&#39;,</span>
+<span class="sd">		s2name=&#39;GAS&#39;,</span>
+<span class="sd">		filt_cutoff=[20, 450],</span>
+<span class="sd">		filt_order=4,</span>
+<span class="sd">		filt_type=&#39;bandpass&#39;,</span>
+<span class="sd">		calib_slope=0.5,</span>
+<span class="sd">		calib_offset=55,</span>
+<span class="sd">		offset_type=&#39;val&#39;,</span>
+<span class="sd">		offset_val=22,</span>
+<span class="sd">		offset_sig=&#39;proc&#39;,</span>
+<span class="sd">		norm_type=&#39;percentage&#39;,</span>
+<span class="sd">		norm_val=None</span>
+<span class="sd">		 norm_sig_version=[&#39;raw&#39;, &#39;_extract_data&#39;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">stype</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">filt_cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filt_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filt_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">calib_slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">calib_offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">offset_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset_sig</span><span class="o">=</span><span class="s1">&#39;proc&#39;</span><span class="p">,</span>
+                 <span class="n">norm_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">norm_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">norm_sig_version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">=</span> <span class="n">stype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s2name</span> <span class="o">=</span> <span class="n">s2name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="n">fs</span>
+
+
+        <span class="k">if</span> <span class="n">filt_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span> <span class="o">=</span> <span class="n">FiltInfo</span><span class="p">(</span><span class="n">stype</span><span class="p">,</span> <span class="n">filt_cutoff</span><span class="p">,</span> <span class="n">filt_order</span><span class="p">,</span> <span class="n">filt_type</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">stype</span> <span class="ow">is</span> <span class="s1">&#39;sEMG&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span> <span class="o">=</span> <span class="n">FiltInfo</span><span class="p">(</span><span class="n">stype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filtInfo</span> <span class="o">=</span> <span class="n">FiltInfo</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">calib_slope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calibInfo</span> <span class="o">=</span> <span class="n">CalibInfo</span><span class="p">(</span><span class="n">calib_slope</span><span class="p">,</span> <span class="n">calib_offset</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calibInfo</span> <span class="o">=</span> <span class="n">CalibInfo</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">offset_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span> <span class="o">=</span> <span class="n">OffsetInfo</span><span class="p">(</span><span class="n">offset_type</span><span class="p">,</span> <span class="n">offset_val</span><span class="p">,</span> <span class="n">offset_sig</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">offsetInfo</span> <span class="o">=</span> <span class="n">OffsetInfo</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">norm_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span> <span class="o">=</span> <span class="n">NormInfo</span><span class="p">(</span><span class="n">type_</span><span class="o">=</span><span class="n">norm_type</span><span class="p">,</span>
+                                     <span class="n">value</span><span class="o">=</span><span class="n">norm_val</span><span class="p">,</span>
+                                     <span class="n">sig_version</span><span class="o">=</span><span class="n">norm_sig_version</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normInfo</span><span class="o">=</span> <span class="n">NormInfo</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="s2">&quot;SigInfo(name={repr(self.name)},</span><span class="se">\n\t\t</span><span class="s2">stype={repr(self.stype)},</span><span class="se">\n\t\t</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="s2">&quot;s2name={repr(self.s2name)},</span><span class="se">\n\t\t</span><span class="s2">filt_cutoff={repr(self.filtInfo.cutoff)},</span><span class="se">\n\t\t</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="s2">&quot;filt_order={repr(self.filtInfo.order)},</span><span class="se">\n\t\t</span><span class="s2">filt_type={repr(self.filtInfo.type)},</span><span class="se">\n\t\t</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="s2">&quot;calib_slope={repr(self.calibInfo.slope)},</span><span class="se">\n\t\t</span><span class="s2">calib_offset={repr(self.calibInfo.offset)},</span><span class="se">\n\t\t</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="s2">&quot;offset_type={repr(self.offsetInfo.type)},</span><span class="se">\n\t\t</span><span class="s2">offset_val={repr(self.offsetInfo.val)},</span><span class="se">\n\t\t</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="s2">&quot;norm_type={repr(self.normInfo.type)},</span><span class="se">\n\t\t</span><span class="s2">norm_val={repr(self.normInfo.value)}</span><span class="se">\n\t\t</span><span class="s2"> norm_sig_version={repr(self.normInfo.sig_version)})&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TrialInfo"><a class="viewcode-back" href="../api.html#spike2py.TrialInfo">[docs]</a><span class="k">class</span> <span class="nc">TrialInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Information to process trial recorded with Spike2.</span>
+
+<span class="sd">    Passed to spike2.Trial(). Assumes the data has been exported using</span>
+<span class="sd">    the Spike2 script `Batch export MATLAB.2s2` available from CED.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cond : str</span>
+<span class="sd">        Experimental condition (e.g. &#39;cs-100mvc&#39; or &#39;grasp_all_digits&#39;)</span>
+<span class="sd">    path : str</span>
+<span class="sd">        path to .mat file exported from Spike2</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        Full name of .mat file (e.g. &#39;cs-100mvc.mat&#39;)</span>
+<span class="sd">    signals : list of SignalInfo</span>
+<span class="sd">        Each item in list is a `SigInfo` instance.</span>
+<span class="sd">        These are the sig to be analysed.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; import spike2py</span>
+
+<span class="sd">    &gt;&gt;&gt; cond = &#39;grasp 10s&#39;</span>
+<span class="sd">    &gt;&gt;&gt; path = &#39;/home/martin/Documents/grasp_study/data/&#39;</span>
+<span class="sd">    &gt;&gt;&gt; filename = &#39;grasp_10s.mat&#39;</span>
+<span class="sd">    &gt;&gt;&gt; signal = spike2py.SigInfo(name=&#39;FDI EMG&#39;, stype=&#39;sEMG&#39;, s2name=&#39;FDI_emg&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; trial_info = spike2py.TrialInfo(cond, path, filename, signal)</span>
+<span class="sd">    &gt;&gt;&gt; trial_info</span>
+<span class="sd">    spike2.TrialInfo(cond=&#39;grasp 10s&#39;,</span>
+<span class="sd">		path=&#39;/home/martin/Documents/grasp_study/data/&#39;,</span>
+<span class="sd">		filename=&#39;grasp_10s.mat&#39;,</span>
+<span class="sd">		signal=signal)</span>
+<span class="sd">		# signal is an instance of spike2.SigInfo or a list of instances.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">signals</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cond</span> <span class="o">=</span> <span class="n">cond</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signals</span> <span class="o">=</span> <span class="n">signals</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;spike2.TrialInfo(cond={repr(self.cond)}, </span><span class="se">\n\t\t</span><span class="s2">path={repr(self.path)},&quot;</span> \
+               <span class="n">f</span><span class="s2">&quot;</span><span class="se">\n\t\t</span><span class="s2">filename={repr(self.filename)}, </span><span class="se">\n\t\t</span><span class="s2">signal=signal)&quot;</span> \
+               <span class="n">f</span><span class="s2">&quot;</span><span class="se">\n\n\t\t</span><span class="s2"># signal is an instance of spike2.SigInfo or a list of instances.&quot;</span></div>
+
+
+<div class="viewcode-block" id="FiltInfo"><a class="viewcode-back" href="../api.html#spike2py.FiltInfo">[docs]</a><span class="k">class</span> <span class="nc">FiltInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Filter information.</span>
+
+<span class="sd">    Can be used independently, but most often passed to `SigInfo`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    stype : str, optional</span>
+<span class="sd">        Signal type. `external`, `waveform`, `sEMG`</span>
+<span class="sd">    cutoff : int, float, or list, optional</span>
+<span class="sd">        Cutoff frequency of filter. Can be a single value for `lowpass` and</span>
+<span class="sd">        `highpass` filters (e.g. 5), or a pair of `int` or `float` in a list</span>
+<span class="sd">        (e.g. [20, 450]).</span>
+<span class="sd">    order : int, optional</span>
+<span class="sd">        Filter order; usually 2, 4 or 8.</span>
+<span class="sd">    type : str, optional</span>
+<span class="sd">        `lowpass`, `highpass`, `bandpass`, `bandstop`</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; import spike2py</span>
+
+<span class="sd">    &gt;&gt;&gt; filter = spike2py.FiltInfo(stype=&#39;sEMG&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; filter</span>
+<span class="sd">    FiltInfo(cutoff=[20, 450], order=4, type=&#39;bandpass&#39;)</span>
+
+
+<span class="sd">    &gt;&gt;&gt; filter = spike2py.FiltInfo(cutoff=50, order=4, type=&#39;highpass&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; filter</span>
+<span class="sd">    FiltInfo(cutoff=50, order=4, type=&#39;highpass&#39;)</span>
+
+
+<span class="sd">    &gt;&gt;&gt; filter = spike2py.FiltInfo(cutoff=[2, 10], order=8, type=&#39;bandstop&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; filter</span>
+<span class="sd">    FiltInfo(&#39;cutoff=[2, 10], order=8, type=&#39;bandstop&#39;)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The default for `stype` sEMG assumes the filter will be used on a raw</span>
+<span class="sd">    signal. When a sEMG signal is created, a rectified and 5Hz lowpass</span>
+<span class="sd">    envelop version is also created. If an envelop with a different cutoff</span>
+<span class="sd">    frequency is desired, run `Signal.envelop(cutoff=val)` with the</span>
+<span class="sd">    desired cutoff value specified.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">stype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span> <span class="o">=</span> <span class="n">cutoff</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="n">order</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="k">elif</span> <span class="n">stype</span> <span class="ow">is</span> <span class="s1">&#39;sEMG&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">450</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="mi">4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s1">&#39;bandpass&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span> <span class="o">=</span> <span class="n">cutoff</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="n">order</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;FiltInfo(cutoff={repr(self.cutoff)}, order={repr(self.order)}, &quot;</span> \
+               <span class="n">f</span><span class="s2">&quot;type={repr(self.type)})&quot;</span></div>
+
+
+<div class="viewcode-block" id="CalibInfo"><a class="viewcode-back" href="../api.html#spike2py.CalibInfo">[docs]</a><span class="k">class</span> <span class="nc">CalibInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Calibration information.</span>
+
+<span class="sd">    Can be used independently, but most often passed to `SigInfo`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    slope : int or float, optional</span>
+<span class="sd">        Slope of calibration equation</span>
+<span class="sd">    offset : int or float, optional</span>
+<span class="sd">        Offset of calibration equation (i.e. intercept)</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; import spike2py</span>
+
+<span class="sd">    &gt;&gt;&gt; calibrate = spike2py.CalibInfo(slope=54.8, offset=2.6)</span>
+<span class="sd">    &gt;&gt;&gt; calibrate</span>
+<span class="sd">    CalibInfo(slope=54.8, offset=2.6)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s1">&#39;CalibInfo(slope={repr(self.slope)}, offset={repr(self.offset)})&#39;</span></div>
+
+
+<div class="viewcode-block" id="OffsetInfo"><a class="viewcode-back" href="../api.html#spike2py.OffsetInfo">[docs]</a><span class="k">class</span> <span class="nc">OffsetInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Offset removal information.</span>
+
+<span class="sd">    Can be used independently, but most often passed to `SigInfo`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    type : str, optional</span>
+<span class="sd">        `val` to remove value provided. `mean` to remove mean of signal.</span>
+<span class="sd">        `start` to remove mean of n points from start of trial.</span>
+<span class="sd">    val: int, optional</span>
+<span class="sd">        Value required for `val` and `start` offset removal types.</span>
+
+<span class="sd">    sig: str, default (`proc`)</span>
+<span class="sd">        Identifies which signal to remove the offset. `proc` and `rect` remove</span>
+<span class="sd">        the offset in-place (i.e. result will overwrite original signal.</span>
+<span class="sd">        However, `raw` will cause the offset to be removed from the `raw` signal</span>
+<span class="sd">        and the result stored in `proc`.</span>
+
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; import spike2py</span>
+
+<span class="sd">    &gt;&gt;&gt; offset = spike2py.OffsetInfo(type=&#39;val&#39;, val=44.5)</span>
+<span class="sd">    &gt;&gt;&gt; offset</span>
+<span class="sd">    OffsetInfo(type=&#39;val&#39;, val=44.5, sig=&#39;proc&#39;)</span>
+
+
+<span class="sd">    &gt;&gt;&gt; offset = spike2py.OffsetInfo(type=&#39;mean&#39;, val=&#39;&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; offset</span>
+<span class="sd">    OffsetInfo(type=&#39;val&#39;, val=&#39;&#39;, sig=&#39;proc&#39;)</span>
+
+
+<span class="sd">    &gt;&gt;&gt; offset = spike2py.OffsetInfo(type=&#39;start&#39;, val=100, sig=&#39;raw&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; offset</span>
+<span class="sd">    OffsetInfo(type=&#39;start&#39;, val=100, sig=&#39;raw&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; offset = spike2py.OffsetInfo(type=&#39;start&#39;, val=100, sig=&#39;rect&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; offset</span>
+<span class="sd">    OffsetInfo(type=&#39;start&#39;, val=100, sig=&#39;rect&#39;)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If an offset is removed from an EMG signal when first imported, then the</span>
+<span class="sd">    mean of the `proc` version of the EMG signal will not be removed. It is</span>
+<span class="sd">    assumed that the user has provided offset details that replicate this step</span>
+<span class="sd">    or remove the offsets from only a portion of the trial (e.g. only the</span>
+<span class="sd">    first 5s to avoid the influence of a stimulation artifact.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sig</span><span class="o">=</span><span class="s1">&#39;proc&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sig</span> <span class="o">=</span> <span class="n">sig</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;OffsetInfo(type={repr(self.type)}, val={repr(self.val)}, &quot;</span> \
+            <span class="n">f</span><span class="s2">&quot;sig={repr(self.sig)})&quot;</span></div>
+
+
+<div class="viewcode-block" id="NormInfo"><a class="viewcode-back" href="../api.html#spike2py.NormInfo">[docs]</a><span class="k">class</span> <span class="nc">NormInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Normalization information.</span>
+
+<span class="sd">    Can be used independently, but most often passed to `SigInfo`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    type: str</span>
+<span class="sd">        Specify type of normalization to apply. Possibilities are</span>
+<span class="sd">        `percentage`: Signal will range from 0-100, based on maximum in signal</span>
+<span class="sd">        `proportional`: Signal will range from 0-1, based on maximum in signal</span>
+<span class="sd">        `value`: Signal will range from 0-100, based on maximum in signal</span>
+<span class="sd">    val: float, optional</span>
+<span class="sd">        Value required for `value` normalization type.</span>
+<span class="sd">    sig_version : list of str items, optional</span>
+<span class="sd">        Possibilities include `raw`, `_extract_data`, `rect`, `envel`, `interp`.</span>
+<span class="sd">        Default is to use `_extract_data`. `interp` will apply normilization to all `interp` signals</span>
+
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; import spike2py</span>
+
+<span class="sd">    &gt;&gt;&gt; norm_info = spike2py.NormInfo(type_=&#39;proportion&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; norm_info</span>
+<span class="sd">    NormtInfo(type=&#39;proportion&#39;, value=None, sig_version=[&#39;_extract_data&#39;])</span>
+
+
+<span class="sd">    &gt;&gt;&gt; norm_info =spike2py.NormInfo(type_=&#39;percentatge&#39;, sig_version=[&#39;raw&#39;, eextract_datact_data, &#39;rect&#39;, &#39;envel&#39;, &#39;interp&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; norm_info</span>
+<span class="sd">    NormtInfo(type=&#39;percentatge&#39;, value=None, sig_version=[&#39;rextract_data &#39;proc&#39;, &#39;rect&#39;, &#39;envel&#39;, &#39;interp&#39;])</span>
+
+<span class="sd">    &gt;&gt;&gt; norm_info =spike2py.NormInfo(type_=&#39;value&#39;, value=4.53)</span>
+<span class="sd">    &gt;&gt;&gt; norm_info</span>
+<span class="sd">    NormtInfo(type=&#39;value&#39;, value=4.53, sig_version= [&#39;proc&#39;])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sig_version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">type_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">sig_version</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sig_version</span> <span class="o">=</span> <span class="p">[</span><span class="n">sig_version</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">sig_version</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sig_version</span> <span class="o">=</span> <span class="n">sig_version</span>
+        <span class="k">elif</span> <span class="n">sig_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sig_version</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;proc&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;The parameter sig_version for the NormInfo class&#39;</span>
+                  <span class="n">f</span><span class="s1">&#39;was of an unexpected type &lt;{type(sig_version)}&gt;&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Expect a str or a list of str.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;NormtInfo(type={repr(self.type)}, value={repr(self.value)}, &quot;</span> \
+            <span class="n">f</span><span class="s2">&quot;sig_version={repr(self.sig_version)})&quot;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">spike2py 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Martin Héroux.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+    </div>
+  </body>
+</html>

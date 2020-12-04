@@ -1,0 +1,653 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>API reference &#8212; spike2py 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">spike2py 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API reference</a><ul>
+<li><a class="reference internal" href="#signal">Signal</a></li>
+<li><a class="reference internal" href="#trial">Trial</a></li>
+<li><a class="reference internal" href="#siginfo">SigInfo</a></li>
+<li><a class="reference internal" href="#trialinfo">TrialInfo</a></li>
+<li><a class="reference internal" href="#filtinfo">FiltInfo</a></li>
+<li><a class="reference internal" href="#calibinfo">CalibInfo</a></li>
+<li><a class="reference internal" href="#offsetinfo">OffsetInfo</a></li>
+<li><a class="reference internal" href="#norminfo">NormInfo</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Tutorial</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/api.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-spike2py">
+<span id="api-reference"></span><h1>API reference<a class="headerlink" href="#module-spike2py" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="signal">
+<h2>Signal<a class="headerlink" href="#signal" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="spike2py.Signal">
+<em class="property">class </em><code class="descclassname">spike2py.</code><code class="descname">Signal</code><span class="sig-paren">(</span><em>signal</em>, <em>stype</em>, <em>name</em>, <em>fs=None</em>, <em>s2name=None</em>, <em>filtInfo=None</em>, <em>calibInfo=None</em>, <em>offsetInfo=None</em>, <em>normInfo=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Signal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Signal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal object</p>
+<p>Signal and accompanying information. Most often this is a signal recorded
+using Spike2, but can also be an external signal that needs to be
+processed alongside the signal recorded with Spike2.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sig</strong> (<em>np.array</em><em> or </em><em>list</em><em> or </em><em>list of lists</em>) – When used in the context of the <cite>Trial</cite> class and a signal recorded
+in Spike2, <cite>sig</cite> will be the signal obtained from the imported Matlab
+file. The signal is obtained from <cite>data[s2name]</cite>, where <cite>s2name</cite> is the
+name of the Spike2 channel. If using with a signal not recorded in
+Spike2, <cite>sig</cite> will be either the signal on its own, or the signal and an
+accompanying time axis. <cite>sig</cite> = [<cite>signal</cite>, <cite>times</cite>]  where <cite>times</cite> is
+optional.</li>
+<li><strong>stype</strong> (<em>str</em>) – Signal type. <cite>external</cite>: signal not recorded by Spike2 but needed for analysis.
+<cite>waveform</cite> : signal sampled at regular intervals. <cite>trig</cite> : trigger signal
+<cite>sEMG</cite> : surface EMG signal</li>
+<li><strong>s2name</strong> (<em>str</em>) – Spike2 channel name</li>
+<li><strong>name</strong> (<em>str</em>) – Informative name for signal</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>fs</strong> (<em>int, optional</em>) – Sampling frequency of signal. If <cite>times</cite> is not present, <cite>fs</cite> is used
+to create a time axis for the signal.</li>
+<li><strong>filtInfo</strong> (<em>FiltInfo, optional</em>) – Contains filter information</li>
+<li><strong>calibInfo</strong> (<em>CalibInfo, optional</em>) – Contains calibration information</li>
+<li><strong>offsetInfo</strong> (<em>OffsetInfo, optional</em>) – Contains offset information</li>
+<li><strong>normInfo</strong> (<em>NormInfo, option</em>) – Contains normalization information</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="spike2py.Signal.calibrate">
+<code class="descname">calibrate</code><span class="sig-paren">(</span><em>slope=None</em>, <em>offset=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Signal.calibrate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Signal.calibrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calibrate signal.</p>
+<p>Done when signal first created if <cite>calibInfo</cite> parameter provided.
+However, it can also be performed after the signal has been created if
+the <cite>slope</cite> and <cite>offset</cite> parameters are provided. <cite>calibInfo</cite> will be
+added to sig.</p>
+<p>See <cite>CalibInfo</cite> for details on <cite>slope</cite> and <cite>offset</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike2py.Signal.envelop">
+<code class="descname">envelop</code><span class="sig-paren">(</span><em>cutoff=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Signal.envelop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Signal.envelop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a signal envelop for sEMG.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cutoff</strong> (<em>int</em><em>, </em><em>default 5</em>) – Cutoff frequency for lowpass filter</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike2py.Signal.filter">
+<code class="descname">filter</code><span class="sig-paren">(</span><em>cutoff=None</em>, <em>order=None</em>, <em>type_=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Signal.filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Signal.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter signal.</p>
+<p>Done when signal first created if <cite>filtInfo</cite> parameter provided.
+However, it can also be performed after the signal has been created if
+the <cite>cutoff</cite>, <cite>order</cite> and <cite>type</cite> parameters are provided. <cite>filtInfo</cite>
+will be added to sig.</p>
+<p>See <cite>FiltInfo</cite> for details on <cite>cutoff</cite>, <cite>order</cite> and <cite>type</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike2py.Signal.interpolate">
+<code class="descname">interpolate</code><span class="sig-paren">(</span><em>name</em>, <em>signal_id</em>, <em>subset=None</em>, <em>new_x=None</em>, <em>new_fs=None</em>, <em>old_x=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Signal.interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Signal.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear interpolation of signal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – name to give to new interpolated signal</li>
+<li><strong>sig_id</strong> (<em>str</em>) – Select which values to interpolation (e.g. ‘raw’ or ‘proc’).</li>
+<li><strong>subset</strong> (<em>list of two int and one bool</em><em>, </em><em>optional</em>) – Index values to subset signal and True/False of whether or not to
+zero new x-axis</li>
+<li><strong>new_x</strong> (<em>np.array</em><em> (</em><em>optional</em><em>)</em>) – If provided, directly used as the new_x to interp values</li>
+<li><strong>new_fs</strong> (<em>int</em><em> (</em><em>optional</em><em>)</em>) – If provided, new_x generated based on new sampling fq</li>
+<li><strong>old_x</strong> (<em>np.array</em><em> (</em><em>optional</em><em>, </em><em>default is self.times</em><em>)</em>) – If provided, used as the old_x</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spike2py</span>
+</pre></div>
+</div>
+<p>Interpolate to a new sampling rate</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;torque&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;fs15&#39;</span><span class="p">,</span> <span class="n">signal_id</span><span class="o">=</span><span class="s1">&#39;proc&#39;</span><span class="p">,</span> <span class="n">new_fs</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Interpolate to a new x-axis</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">new_x</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;torque&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">raw_vals</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;torque&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;interpolate&#39;</span><span class="p">,</span> <span class="n">signal_id</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">,</span> <span class="n">new_x</span><span class="o">=</span><span class="n">new_x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Can provide <cite>new_x</cite> to interpolate values to this new x-axis or times,
+or <cite>fs</cite> to interpolate to a new x-axis created with a sampling rate of
+<cite>fs</cite> Hz.</p>
+<p>The default x-axis for the original (pre-interpolation) signal is
+<cite>self.times</cite>; however, a different <cite>old_x</cite> can be specified.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike2py.Signal.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>type_=None</em>, <em>value=None</em>, <em>signal_version=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Signal.normalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Signal.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize signal.</p>
+<p>Done when signal first created if <cite>normInfo</cite> parameter provided.
+However, it can also be performed after the signal has been created.
+<cite>normInfo</cite> will be added to sig.</p>
+<p>See <cite>normInfo</cite> for details on <cite>type</cite>, <cite>value</cite> and <cite>sig_version</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike2py.Signal.remove_offset">
+<code class="descname">remove_offset</code><span class="sig-paren">(</span><em>type_=None</em>, <em>val=None</em>, <em>sig='proc'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Signal.remove_offset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Signal.remove_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove offset from signal.</p>
+<p>Done when signal first created if <cite>offsetInfo</cite> parameter provided.
+However, it can be performed after the signal has been created if the
+<cite>type</cite> and <cite>val</cite> parameters are provided; <cite>offsetInfo</cite> will be added to
+signal.</p>
+<p>By default offset is removed from <cite>proc</cite> signal. However,
+if sig=`raw`, then the offset will be removed from the raw signal and
+the results stored in <cite>proc</cite>. if sig=`rect`, then the offset will be
+removed from the <cite>rect</cite> signals and the results stored in <cite>rect</cite>.</p>
+<p>See <cite>OffsetInfo</cite> for details on <cite>type</cite>, <cite>val</cite> and <cite>sig</cite>.</p>
+<p class="rubric">Notes</p>
+<p>If an offset is removed from an EMG signal when first imported, then the
+mean of the <cite>proc</cite> version of the EMG signal will not be removed. It is
+assumed that the user has provided offset details that replicate this step
+or remove the offsets from only a portion of the trial (e.g. only the
+first 5s to avoid the influence of a stimulation artifact.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="trial">
+<h2>Trial<a class="headerlink" href="#trial" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="spike2py.Trial">
+<em class="property">class </em><code class="descclassname">spike2py.</code><code class="descname">Trial</code><span class="sig-paren">(</span><em>trialInfo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Trial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Trial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for trial.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>trialInfo</strong> (<a class="reference internal" href="#spike2py.TrialInfo" title="spike2py.TrialInfo"><em>TrialInfo</em></a>) – Class containing details about trial and its signals</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spike2py</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trial_pc1</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">Trial</span><span class="p">(</span><span class="n">trial_info1</span><span class="p">)</span>  <span class="c1"># Assumes `trial_info1` available</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trial_pc2</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">Trial</span><span class="p">(</span><span class="n">trial_info2</span><span class="p">)</span>  <span class="c1"># Assumes `trial_info2 available</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial_pc1</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="s1">&#39;pc2&#39;</span><span class="p">,</span> <span class="n">trial_pc2</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">us</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;us&#39;</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;external&#39;</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>  <span class="c1"># ultrasound</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">us_sig</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">us_dat</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="n">us</span><span class="o">.</span><span class="n">stype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">us</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="n">us</span><span class="o">.</span><span class="n">fs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial_pc1</span><span class="o">.</span><span class="n">add_sig</span><span class="p">(</span><span class="s1">&#39;us&#39;</span><span class="p">,</span> <span class="n">us_sig</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="spike2py.Trial.add_sig">
+<code class="descname">add_sig</code><span class="sig-paren">(</span><em>sig_name</em>, <em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Trial.add_sig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Trial.add_sig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add signal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sig_name</strong> (<em>str</em>) – Short informative name for signal; will be key to retrieve
+signal from <cite>Trial.sig[key]</cite></li>
+<li><strong>sig</strong> (<cite>Signal</cite>, list, np.array, int, float, bool) – Data associated with added signal</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Designed to have <cite>sig</cite> be a <cite>Signal</cite> instance, but this implementation
+provides flexibility to the user to add any type of signal or value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spike2py.Trial.merge">
+<code class="descname">merge</code><span class="sig-paren">(</span><em>trial</em>, <em>prefix=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#Trial.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.Trial.merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge trials.</p>
+<p>Adds all signals from another <cite>Trial</cite> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>trial</strong> (<a class="reference internal" href="#spike2py.Trial" title="spike2py.Trial"><em>Trial</em></a>) – Trial containing signals to be merged</li>
+<li><strong>prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Prefix to add to merged signal names. Default is <cite>merged_</cite></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="siginfo">
+<h2>SigInfo<a class="headerlink" href="#siginfo" title="Permalink to this headline">¶</a></h2>
+<p>A class to provide information about a signal recorded in Spike2.
+Also allows for certain pre-processing steps to be performed,
+such as filtering, calibrating and offset removal.</p>
+<dl class="class">
+<dt id="spike2py.SigInfo">
+<em class="property">class </em><code class="descclassname">spike2py.</code><code class="descname">SigInfo</code><span class="sig-paren">(</span><em>name</em>, <em>stype</em>, <em>s2name=None</em>, <em>fs=None</em>, <em>filt_cutoff=None</em>, <em>filt_order=None</em>, <em>filt_type=None</em>, <em>calib_slope=None</em>, <em>calib_offset=None</em>, <em>offset_type=None</em>, <em>offset_val=None</em>, <em>offset_sig='proc'</em>, <em>norm_type=None</em>, <em>norm_val=None</em>, <em>norm_sig_version=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#SigInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.SigInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Information to process signal recorded with Spike2.</p>
+<p>Passed to spike2.TrialInfo.sig, which is a list of all sig,
+or a single signal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) – User defined name, because Spike2 channel names are not always clear.</li>
+<li><strong>stype</strong> (<em>str</em>) – Signal type. <cite>external`for a signal not recorded by Spike2 but needed
+for analysis. `waveform</cite> for a signal sampled at regular intervals.
+<cite>trig</cite> for a trigger signal. <cite>sEMG</cite> for a surface EMG signal.</li>
+<li><strong>s2name</strong> (<em>str</em>) – Spike2 channel name.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>fs</strong> (<em>int, optional</em>) – Sampling frequency of signal; used when <cite>stype</cite> is <cite>external</cite></li>
+<li><strong>filt_cutoff</strong> (<em>int, optional</em>) – Value of filter
+Either single value (e.g. 30) or list of 2 values (e.g. [20, 450])</li>
+<li><strong>filt_order</strong> (<em>int, optional</em>) – Order of filter</li>
+<li><strong>filt_type</strong> (<em>str, optional</em>) – Define type of filter: <cite>lowpass</cite>, <cite>highpass</cite>, <cite>bandpass</cite>, <cite>bandstop</cite></li>
+<li><strong>calib_slope</strong> (<em>float or int, optional</em>) – Slope of the calibration equation</li>
+<li><strong>calib_offset</strong> (<em>float or int, optional</em>) – Offset of the calibration equation (i.e. intercept)</li>
+<li><strong>offset_type</strong> (<em>str, optional</em>) – <cite>val</cite> to remove value provided. <cite>mean</cite> to remove mean of signal.
+<cite>start</cite> to remove mean of n points from start of trial.</li>
+<li><strong>offset_val</strong> (<em>int, optional</em>) – Value required for <cite>val</cite> and <cite>start</cite> offset removal types.</li>
+<li><strong>offset_sig</strong> (<em>str, default ‘proc’</em>) – Specify which signal from which to remove offset
+offset removal types.</li>
+<li><strong>norm_type</strong> (<em>str, optional</em>) – Specify type of normalization to apply. Possibilities are
+<cite>percentage</cite>: Signal will range from 0-100, based on maximum in signal
+<cite>proportional</cite>: Signal will range from 0-1, based on maximum in signal
+<cite>value</cite>: Signal will range from 0-100, based on maximum in signal</li>
+<li><strong>norm_val</strong> (<em>float, optional</em>) – Value required for <cite>value</cite> normalization type.</li>
+<li><strong>norm_sig_version</strong> (<em>str or list of str, optional</em>) – Possibilities include <cite>raw</cite>, <cite>_extract_data</cite>, <cite>rect</cite>, <cite>envel</cite>, <cite>interp</cite>.
+Default is to use <cite>_extract_data</cite>. <cite>interp</cite> will apply normilization to all <cite>interp</cite> signals</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spike2py</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;gas&#39;</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;sEMG&#39;</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;GAS&#39;</span><span class="p">,</span>
+<span class="go">                                            filt_cutoff=5, filt_order=4, filt_type=&#39;lowpass&#39;,</span>
+<span class="go">                                            calib_slope=0.5, calib_offset=55,</span>
+<span class="go">                                            offset_type=&#39;val&#39;, offset_val=22, offset_sig=&#39;proc&#39;</span>
+<span class="go">                                       norm_type=&#39;percentage&#39;, norm_sig_version=[&#39;raw&#39;, &#39;_extract_data&#39;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gas</span>
+<span class="go">SigInfo(name=&#39;gas&#39;,</span>
+<span class="go">            stype=&#39;sEMG&#39;,</span>
+<span class="go">            s2name=&#39;GAS&#39;,</span>
+<span class="go">            filt_cutoff=[20, 450],</span>
+<span class="go">            filt_order=4,</span>
+<span class="go">            filt_type=&#39;bandpass&#39;,</span>
+<span class="go">            calib_slope=0.5,</span>
+<span class="go">            calib_offset=55,</span>
+<span class="go">            offset_type=&#39;val&#39;,</span>
+<span class="go">            offset_val=22,</span>
+<span class="go">            offset_sig=&#39;proc&#39;,</span>
+<span class="go">            norm_type=&#39;percentage&#39;,</span>
+<span class="go">            norm_val=None</span>
+<span class="go">             norm_sig_version=[&#39;raw&#39;, &#39;_extract_data&#39;])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="trialinfo">
+<h2>TrialInfo<a class="headerlink" href="#trialinfo" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="spike2py.TrialInfo">
+<em class="property">class </em><code class="descclassname">spike2py.</code><code class="descname">TrialInfo</code><span class="sig-paren">(</span><em>cond</em>, <em>path</em>, <em>filename</em>, <em>signals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#TrialInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.TrialInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Information to process trial recorded with Spike2.</p>
+<p>Passed to spike2.Trial(). Assumes the data has been exported using
+the Spike2 script <cite>Batch export MATLAB.2s2</cite> available from CED.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cond</strong> (<em>str</em>) – Experimental condition (e.g. ‘cs-100mvc’ or ‘grasp_all_digits’)</li>
+<li><strong>path</strong> (<em>str</em>) – path to .mat file exported from Spike2</li>
+<li><strong>filename</strong> (<em>str</em>) – Full name of .mat file (e.g. ‘cs-100mvc.mat’)</li>
+<li><strong>signals</strong> (<em>list of SignalInfo</em>) – Each item in list is a <cite>SigInfo</cite> instance.
+These are the sig to be analysed.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spike2py</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cond</span> <span class="o">=</span> <span class="s1">&#39;grasp 10s&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/home/martin/Documents/grasp_study/data/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;grasp_10s.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;FDI EMG&#39;</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;sEMG&#39;</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;FDI_emg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial_info</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">TrialInfo</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">signal</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial_info</span>
+<span class="go">spike2.TrialInfo(cond=&#39;grasp 10s&#39;,</span>
+<span class="go">            path=&#39;/home/martin/Documents/grasp_study/data/&#39;,</span>
+<span class="go">            filename=&#39;grasp_10s.mat&#39;,</span>
+<span class="go">            signal=signal)</span>
+<span class="go">            # signal is an instance of spike2.SigInfo or a list of instances.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="filtinfo">
+<h2>FiltInfo<a class="headerlink" href="#filtinfo" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="spike2py.FiltInfo">
+<em class="property">class </em><code class="descclassname">spike2py.</code><code class="descname">FiltInfo</code><span class="sig-paren">(</span><em>stype=None</em>, <em>cutoff=None</em>, <em>order=None</em>, <em>type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#FiltInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.FiltInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter information.</p>
+<p>Can be used independently, but most often passed to <cite>SigInfo</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>stype</strong> (<em>str</em><em>, </em><em>optional</em>) – Signal type. <cite>external</cite>, <cite>waveform</cite>, <cite>sEMG</cite></li>
+<li><strong>cutoff</strong> (<em>int</em><em>, </em><em>float</em><em>, or </em><em>list</em><em>, </em><em>optional</em>) – Cutoff frequency of filter. Can be a single value for <cite>lowpass</cite> and
+<cite>highpass</cite> filters (e.g. 5), or a pair of <cite>int</cite> or <cite>float</cite> in a list
+(e.g. [20, 450]).</li>
+<li><strong>order</strong> (<em>int</em><em>, </em><em>optional</em>) – Filter order; usually 2, 4 or 8.</li>
+<li><strong>type</strong> (<em>str</em><em>, </em><em>optional</em>) – <cite>lowpass</cite>, <cite>highpass</cite>, <cite>bandpass</cite>, <cite>bandstop</cite></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spike2py</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">filter</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">FiltInfo</span><span class="p">(</span><span class="n">stype</span><span class="o">=</span><span class="s1">&#39;sEMG&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">filter</span>
+<span class="go">FiltInfo(cutoff=[20, 450], order=4, type=&#39;bandpass&#39;)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">filter</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">FiltInfo</span><span class="p">(</span><span class="n">cutoff</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;highpass&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">filter</span>
+<span class="go">FiltInfo(cutoff=50, order=4, type=&#39;highpass&#39;)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">filter</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">FiltInfo</span><span class="p">(</span><span class="n">cutoff</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;bandstop&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">filter</span>
+<span class="go">FiltInfo(&#39;cutoff=[2, 10], order=8, type=&#39;bandstop&#39;)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The default for <cite>stype</cite> sEMG assumes the filter will be used on a raw
+signal. When a sEMG signal is created, a rectified and 5Hz lowpass
+envelop version is also created. If an envelop with a different cutoff
+frequency is desired, run <cite>Signal.envelop(cutoff=val)</cite> with the
+desired cutoff value specified.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="calibinfo">
+<h2>CalibInfo<a class="headerlink" href="#calibinfo" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="spike2py.CalibInfo">
+<em class="property">class </em><code class="descclassname">spike2py.</code><code class="descname">CalibInfo</code><span class="sig-paren">(</span><em>slope=None</em>, <em>offset=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#CalibInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.CalibInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calibration information.</p>
+<p>Can be used independently, but most often passed to <cite>SigInfo</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>slope</strong> (<em>int</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Slope of calibration equation</li>
+<li><strong>offset</strong> (<em>int</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Offset of calibration equation (i.e. intercept)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spike2py</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">calibrate</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">CalibInfo</span><span class="p">(</span><span class="n">slope</span><span class="o">=</span><span class="mf">54.8</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">2.6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calibrate</span>
+<span class="go">CalibInfo(slope=54.8, offset=2.6)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="offsetinfo">
+<h2>OffsetInfo<a class="headerlink" href="#offsetinfo" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="spike2py.OffsetInfo">
+<em class="property">class </em><code class="descclassname">spike2py.</code><code class="descname">OffsetInfo</code><span class="sig-paren">(</span><em>type=None</em>, <em>val=None</em>, <em>sig='proc'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#OffsetInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.OffsetInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Offset removal information.</p>
+<p>Can be used independently, but most often passed to <cite>SigInfo</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>type</strong> (<em>str</em><em>, </em><em>optional</em>) – <cite>val</cite> to remove value provided. <cite>mean</cite> to remove mean of signal.
+<cite>start</cite> to remove mean of n points from start of trial.</li>
+<li><strong>val</strong> (<em>int</em><em>, </em><em>optional</em>) – Value required for <cite>val</cite> and <cite>start</cite> offset removal types.</li>
+<li><strong>sig</strong> (str, default (<cite>proc</cite>)) – Identifies which signal to remove the offset. <cite>proc</cite> and <cite>rect</cite> remove
+the offset in-place (i.e. result will overwrite original signal.
+However, <cite>raw</cite> will cause the offset to be removed from the <cite>raw</cite> signal
+and the result stored in <cite>proc</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spike2py</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">offset</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">OffsetInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;val&#39;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="mf">44.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">offset</span>
+<span class="go">OffsetInfo(type=&#39;val&#39;, val=44.5, sig=&#39;proc&#39;)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">offset</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">OffsetInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">offset</span>
+<span class="go">OffsetInfo(type=&#39;val&#39;, val=&#39;&#39;, sig=&#39;proc&#39;)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">offset</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">OffsetInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">sig</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">offset</span>
+<span class="go">OffsetInfo(type=&#39;start&#39;, val=100, sig=&#39;raw&#39;)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">offset</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">OffsetInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">sig</span><span class="o">=</span><span class="s1">&#39;rect&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">offset</span>
+<span class="go">OffsetInfo(type=&#39;start&#39;, val=100, sig=&#39;rect&#39;)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>If an offset is removed from an EMG signal when first imported, then the
+mean of the <cite>proc</cite> version of the EMG signal will not be removed. It is
+assumed that the user has provided offset details that replicate this step
+or remove the offsets from only a portion of the trial (e.g. only the
+first 5s to avoid the influence of a stimulation artifact.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="norminfo">
+<h2>NormInfo<a class="headerlink" href="#norminfo" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="spike2py.NormInfo">
+<em class="property">class </em><code class="descclassname">spike2py.</code><code class="descname">NormInfo</code><span class="sig-paren">(</span><em>type_=None</em>, <em>value=None</em>, <em>sig_version=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spike2py.html#NormInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spike2py.NormInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalization information.</p>
+<p>Can be used independently, but most often passed to <cite>SigInfo</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>type</strong> (<em>str</em>) – Specify type of normalization to apply. Possibilities are
+<cite>percentage</cite>: Signal will range from 0-100, based on maximum in signal
+<cite>proportional</cite>: Signal will range from 0-1, based on maximum in signal
+<cite>value</cite>: Signal will range from 0-100, based on maximum in signal</li>
+<li><strong>val</strong> (<em>float</em><em>, </em><em>optional</em>) – Value required for <cite>value</cite> normalization type.</li>
+<li><strong>sig_version</strong> (<em>list of str items</em><em>, </em><em>optional</em>) – Possibilities include <cite>raw</cite>, <cite>_extract_data</cite>, <cite>rect</cite>, <cite>envel</cite>, <cite>interp</cite>.
+Default is to use <cite>_extract_data</cite>. <cite>interp</cite> will apply normilization to all <cite>interp</cite> signals</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spike2py</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">norm_info</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">NormInfo</span><span class="p">(</span><span class="n">type_</span><span class="o">=</span><span class="s1">&#39;proportion&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm_info</span>
+<span class="go">NormtInfo(type=&#39;proportion&#39;, value=None, sig_version=[&#39;_extract_data&#39;])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">norm_info</span> <span class="o">=</span><span class="n">spike2py</span><span class="o">.</span><span class="n">NormInfo</span><span class="p">(</span><span class="n">type_</span><span class="o">=</span><span class="s1">&#39;percentatge&#39;</span><span class="p">,</span> <span class="n">sig_version</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;raw&#39;</span><span class="p">,</span> <span class="n">eextract_datact_data</span><span class="p">,</span> <span class="s1">&#39;rect&#39;</span><span class="p">,</span> <span class="s1">&#39;envel&#39;</span><span class="p">,</span> <span class="s1">&#39;interp&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm_info</span>
+<span class="go">NormtInfo(type=&#39;percentatge&#39;, value=None, sig_version=[&#39;rextract_data &#39;proc&#39;, &#39;rect&#39;, &#39;envel&#39;, &#39;interp&#39;])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">norm_info</span> <span class="o">=</span><span class="n">spike2py</span><span class="o">.</span><span class="n">NormInfo</span><span class="p">(</span><span class="n">type_</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">4.53</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm_info</span>
+<span class="go">NormtInfo(type=&#39;value&#39;, value=4.53, sig_version= [&#39;proc&#39;])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">spike2py 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Martin Héroux.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+    </div>
+  </body>
+</html>

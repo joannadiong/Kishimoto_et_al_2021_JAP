@@ -1,0 +1,587 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tutorial &#8212; spike2py 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API reference" href="api.html" />
+    <link rel="prev" title="Overview" href="overview.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Overview"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">spike2py 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#basic-example">Basic Example</a></li>
+<li><a class="reference internal" href="#intermediate-example">Intermediate example</a><ul>
+<li><a class="reference internal" href="#signals">Signals</a><ul>
+<li><a class="reference internal" href="#signal-information">Signal Information</a></li>
+<li><a class="reference internal" href="#signal-object">Signal Object</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trials">Trials</a><ul>
+<li><a class="reference internal" href="#trial-information">Trial Information</a></li>
+<li><a class="reference internal" href="#trial-object">Trial Object</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="overview.html"
+                        title="previous chapter">Overview</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">API reference</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tutorial.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="basic-example">
+<h2>Basic Example<a class="headerlink" href="#basic-example" title="Permalink to this headline">¶</a></h2>
+<p>We will demonstate the basic usage of <a class="reference internal" href="api.html#module-spike2py" title="spike2py"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spike2py</span></code></a> using data from a simple
+experiment. The data was collected in Spike2 and then exported as a Matlab data
+file using <a class="reference external" href="https://github.com/MartinHeroux/spike2py/blob/master/tutorials/Batch_export_MATLAB.s2s">Batch_export_MATLAB.s2s</a>. The trial lasted approximately
+10s and included three signals: a trigger signal, an EMG signal, and a pressure
+signal.</p>
+<p>The trigger signal was recorded as a <cite>trigger</cite>. This means Spike2 saved the times
+when the trigger pulse occurred. The EMG and pressure signal were both recorded
+as <cite>waveform</cite> signals, which is what Spike2 calls continues signals sampled at
+a given sampling rate.</p>
+<p>Here is the basic structure to retrieve the data and obtain a <a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a>
+object. <a class="reference internal" href="api.html#spike2py.SigInfo" title="spike2py.SigInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SigInfo</span></code></a> will be used in its most basic form to give
+<a class="reference internal" href="api.html#module-spike2py" title="spike2py"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spike2py</span></code></a> the required information to properly import our signals. We
+will also use <a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> to contain all the data and information
+about our trial, including the signals themselves.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">spike2py</span>
+
+<span class="n">exp_cond</span> <span class="o">=</span> <span class="s1">&#39;maximum pressure trial 1&#39;</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;max_push1.mat&#39;</span>
+
+<span class="n">trig_info</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;trig&#39;</span><span class="p">,</span>
+                             <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;trig&#39;</span><span class="p">,</span>
+                             <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;trig&#39;</span><span class="p">,</span>
+                             <span class="p">)</span>
+
+<span class="n">emg_info</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;biceps&#39;</span><span class="p">,</span>
+                            <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;sEMG&#39;</span><span class="p">,</span>
+                            <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;EMG&#39;</span><span class="p">,</span>
+                            <span class="p">)</span>
+
+<span class="n">pressure_info</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;pressure&#39;</span><span class="p">,</span>
+                                 <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;waveform&#39;</span><span class="p">,</span>
+                                 <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;signal&#39;</span><span class="p">,</span>
+                                 <span class="p">)</span>
+
+<span class="n">signals</span> <span class="o">=</span> <span class="p">[</span><span class="n">trig_info</span><span class="p">,</span> <span class="n">emg_info</span><span class="p">,</span> <span class="n">pressure_info</span><span class="p">]</span>
+
+<span class="n">trial_info</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">TrialInfo</span><span class="p">(</span><span class="n">cond</span><span class="o">=</span><span class="n">exp_cond</span><span class="p">,</span>
+                                <span class="n">path</span><span class="o">=</span><span class="s1">&#39;./tutorials/&#39;</span><span class="p">,</span>
+                                <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                                <span class="n">signals</span><span class="o">=</span><span class="n">signals</span><span class="p">,</span>
+                                <span class="p">)</span>
+
+<span class="n">trial</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">Trial</span><span class="p">(</span><span class="n">trial_info</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We now have a <cite>trial</cite> object that contains information about our trial, and the
+various signals we recorded.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">cond</span>
+<span class="go">&#39;maximum pressure trial 1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">filename</span>
+<span class="go">&#39;max_push1.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span>
+<span class="go">{&#39;trig&#39;: Signal(sig=sig, name=&#39;trig_info&#39;, s2name=&#39;trig&#39;, stype=&#39;trig&#39;),</span>
+<span class="go"> &#39;biceps&#39;: Signal(sig=sig, name=&#39;biceps&#39;, s2name=&#39;EMG&#39;, stype=&#39;sEMG&#39;),</span>
+<span class="go"> &#39;pressure&#39;: Signal(sig=sig, name=&#39;pressure&#39;, s2name=&#39;signal&#39;, stype=&#39;waveform&#39;)}</span>
+</pre></div>
+</div>
+<p>We can access our data to process or plot. For example, we can inspect the
+trigger times.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;trig&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">times</span>
+<span class="go">array([[0.701],</span>
+<span class="go">       [3.501],</span>
+<span class="go">       [3.801],</span>
+<span class="go">       [4.701],</span>
+<span class="go">       [4.901],</span>
+<span class="go">       [5.101],</span>
+<span class="go">       [5.301],</span>
+<span class="go">       [5.501],</span>
+<span class="go">       [5.701],</span>
+<span class="go">       [5.901],</span>
+<span class="go">       [6.101],</span>
+<span class="go">       [6.301],</span>
+<span class="go">       [6.501]])</span>
+</pre></div>
+</div>
+<p>We can plot the biceps EMG data. Note that by specifying <cite>stype=sEMG</cite> for our
+EMG data, <a class="reference internal" href="api.html#module-spike2py" title="spike2py"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spike2py</span></code></a> automatically creates a rectified and envelop version
+of our EMG data.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;biceps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;biceps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">raw</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;raw EMG&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;amplitude (a.u.)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time (s)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;biceps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;biceps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rect</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;rectified EMG&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;biceps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;biceps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">envel</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;envelop EMG&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;amplitude (a.u.)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time (s)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="_images/biceps_emg.png" src="_images/biceps_emg.png" />
+<p>We can also plot the pressure.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">raw</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;amplitude (a.u.)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time (s)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/pressure.png"><img alt="_images/pressure.png" src="_images/pressure.png" style="width: 600px; height: 400px;" /></a>
+</div>
+<div class="section" id="intermediate-example">
+<h2>Intermediate example<a class="headerlink" href="#intermediate-example" title="Permalink to this headline">¶</a></h2>
+<p>We will re-use the data from the previous example and learn more about
+<a class="reference internal" href="api.html#spike2py.SigInfo" title="spike2py.SigInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SigInfo</span></code></a>, understand how directly create
+<a class="reference internal" href="api.html#spike2py.Signal" title="spike2py.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a> objects (when exploring new data and debugging your code),
+and better understand how <a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> simplifies things when
+many signals were recorded.</p>
+<div class="section" id="signals">
+<h3>Signals<a class="headerlink" href="#signals" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="signal-information">
+<h4>Signal Information<a class="headerlink" href="#signal-information" title="Permalink to this headline">¶</a></h4>
+<p>We will create <a class="reference internal" href="api.html#spike2py.SigInfo" title="spike2py.SigInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SigInfo</span></code></a> ojbects to provide information about
+each of the signals that were recorded. As described in the advanced example,
+we can include information about how to filter or calibrate our signal, as well
+as remove an offset. But for this first example we will include the minimum
+information required.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">spike2py</span> <span class="k">as</span> <span class="nn">spk2</span>
+<span class="n">trig_info</span> <span class="o">=</span> <span class="n">spk2</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;trig_info&#39;</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;trig&#39;</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;trig&#39;</span><span class="p">)</span>
+<span class="n">emg_info</span> <span class="o">=</span> <span class="n">spk2</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;biceps&#39;</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;sEMG&#39;</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;EMG&#39;</span><span class="p">)</span>
+<span class="n">pressure_info</span> <span class="o">=</span> <span class="n">spk2</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;waveform&#39;</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;signal&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For each signal we include:</p>
+<ul class="simple">
+<li><strong>name</strong>: Informative name.</li>
+<li><strong>stype</strong>: Signal type for spike2py (different to the signal types from Spike2).
+Tells <a class="reference internal" href="api.html#module-spike2py" title="spike2py"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spike2py</span></code></a> how to import the signals and whether to perform some
+default signal processing (i.e. filtering, rectification and envolop for <cite>sEMG</cite>),</li>
+<li><strong>s2name</strong>: Name of signal used when recording from Spike2.</li>
+</ul>
+<p>Let’s inspect the information related to our three signals:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trig_info</span>
+<span class="go">SigInfo(name=&#39;trigger&#39;</span>
+<span class="go">    stype=&#39;trig&#39;</span>
+<span class="go">    s2name=&#39;trig&#39;</span>
+<span class="go">    filt_cutoff=None,</span>
+<span class="go">    filt_order=None,</span>
+<span class="go">    filt_type=None,</span>
+<span class="go">    calib_slope=None,</span>
+<span class="go">    calib_offset=None,</span>
+<span class="go">    offset_type=None,</span>
+<span class="go">    offset_val=None,</span>
+<span class="go">    offset_sig=&#39;proc&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">emg_info</span>
+<span class="go">SigInfo(name=&#39;biceps&#39;,</span>
+<span class="go">    stype=&#39;sEMG&#39;,</span>
+<span class="go">    s2name=&#39;EMG&#39;,</span>
+<span class="go">    filt_cutoff=[20, 450],</span>
+<span class="go">    filt_order=4,</span>
+<span class="go">    filt_type=&#39;bandpass&#39;,</span>
+<span class="go">    calib_slope=None,</span>
+<span class="go">    calib_offset=None,</span>
+<span class="go">    offset_type=None,</span>
+<span class="go">    offset_val=None,</span>
+<span class="go">    offset_sig=&#39;proc&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pressure_info</span>
+<span class="go">SigInfo(name=&#39;pressure&#39;,</span>
+<span class="go">    stype=&#39;waveform&#39;,</span>
+<span class="go">    s2name=&#39;signal&#39;,</span>
+<span class="go">    filt_cutoff=None,</span>
+<span class="go">    filt_order=None,</span>
+<span class="go">    filt_type=None,</span>
+<span class="go">    calib_slope=None,</span>
+<span class="go">    calib_offset=None,</span>
+<span class="go">    offset_type=None,</span>
+<span class="go">    offset_val=None,</span>
+<span class="go">    offset_sig=&#39;proc&#39;)</span>
+</pre></div>
+</div>
+<p>We can see that <a class="reference internal" href="api.html#spike2py.SigInfo" title="spike2py.SigInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SigInfo</span></code></a> has several additional parameters
+that we have not included; these are set to <cite>None</cite> by default. We can also see
+that because we set <cite>emg</cite> to have <cite>stype=sEMG</cite>, <a class="reference internal" href="api.html#module-spike2py" title="spike2py"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spike2py</span></code></a> automatically
+created a 4th order butterworth band-pass filter of 20-450Hz. These values can
+be overridden if required.</p>
+</div>
+<div class="section" id="signal-object">
+<h4>Signal Object<a class="headerlink" href="#signal-object" title="Permalink to this headline">¶</a></h4>
+<p>The easiest way to import signals from data saved as at MATLAB file is to pass
+one or more <a class="reference internal" href="api.html#spike2py.SigInfo" title="spike2py.SigInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SigInfo</span></code></a> objects to <a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a>. The
+<a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> Class handles the details of opening the MATLAB file and
+parsing out the data.</p>
+<p>However, when starting out with <a class="reference internal" href="api.html#module-spike2py" title="spike2py"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spike2py</span></code></a> or when debugging a problem, it
+can be useful to know how to directly obtain a <a class="reference internal" href="api.html#spike2py.Signal" title="spike2py.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a>. Below
+is a simple example of how this can be done:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">sio</span>
+<span class="kn">import</span> <span class="nn">spike2py</span> <span class="k">as</span> <span class="nn">spk2</span>
+</pre></div>
+</div>
+<p>We will use the <cite>scipy.io</cite> module to read our data from the MATLAB file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;max_push1.mat&#39;</span>
+<span class="n">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;tutorials&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All the data from our trial in in <cite>data</cite>, a dictionary object of signals and
+other information generated by <cite>Spike2</cite> about our trial and signals. For
+our example, we will create a <a class="reference internal" href="api.html#spike2py.Signal" title="spike2py.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a> object for our trigger
+signal. To do so we will again create a <a class="reference internal" href="api.html#spike2py.SigInfo" title="spike2py.SigInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SigInfo</span></code></a>, and then pass
+the information it contains to <a class="reference internal" href="api.html#spike2py.Signal" title="spike2py.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">trig_info</span> <span class="o">=</span> <span class="n">spk2</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;trig&#39;</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;trig&#39;</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;trig&#39;</span><span class="p">)</span>
+<span class="n">trig</span> <span class="o">=</span> <span class="n">spk2</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">sig</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">trig_info</span><span class="o">.</span><span class="n">s2name</span><span class="p">],</span>
+                   <span class="n">stype</span><span class="o">=</span><span class="n">trig_info</span><span class="o">.</span><span class="n">stype</span><span class="p">,</span>
+                   <span class="n">name</span><span class="o">=</span><span class="n">trig_info</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                   <span class="n">s2name</span><span class="o">=</span><span class="n">trig_info</span><span class="o">.</span><span class="n">s2name</span><span class="p">,</span>
+                   <span class="n">fs</span><span class="o">=</span><span class="n">trig_info</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
+                   <span class="n">filtInfo</span><span class="o">=</span><span class="n">trig_info</span><span class="o">.</span><span class="n">filtInfo</span><span class="p">,</span>
+                   <span class="n">calibInfo</span><span class="o">=</span><span class="n">trig_info</span><span class="o">.</span><span class="n">calibInfo</span><span class="p">,</span>
+                   <span class="n">offsetInfo</span><span class="o">=</span><span class="n">trig_info</span><span class="o">.</span><span class="n">offsetInfo</span><span class="p">,</span>
+                   <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trig</span>
+<span class="go">Signal(sig=sig, name=&#39;trig&#39;, s2name=&#39;trig&#39;, stype=&#39;trig&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trig</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;trig&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trig</span><span class="o">.</span><span class="n">s2name</span>
+<span class="go">&#39;trig&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trig</span><span class="o">.</span><span class="n">stype</span>
+<span class="go">&#39;trig&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trig</span><span class="o">.</span><span class="n">times</span>
+<span class="go">array([[0.701],</span>
+<span class="go">       [3.501],</span>
+<span class="go">       [3.801],</span>
+<span class="go">       [4.701],</span>
+<span class="go">       [4.901],</span>
+<span class="go">       [5.101],</span>
+<span class="go">       [5.301],</span>
+<span class="go">       [5.501],</span>
+<span class="go">       [5.701],</span>
+<span class="go">       [5.901],</span>
+<span class="go">       [6.101],</span>
+<span class="go">       [6.301],</span>
+<span class="go">       [6.501]])</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><cite>trig</cite> signals have their data –the time of the triggers– in the <cite>.times</cite>
+attribute.</p>
+</div>
+<p>Now let’s repeat the process for our pressure signal:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pressure_info</span> <span class="o">=</span> <span class="n">spk2</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;waveform&#39;</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;signal&#39;</span><span class="p">)</span>
+<span class="n">pressure</span> <span class="o">=</span> <span class="n">spk2</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">sig</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">pressure_info</span><span class="o">.</span><span class="n">s2name</span><span class="p">],</span>
+                       <span class="n">stype</span><span class="o">=</span><span class="n">pressure_info</span><span class="o">.</span><span class="n">stype</span><span class="p">,</span>
+                       <span class="n">name</span><span class="o">=</span><span class="n">pressure_info</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                       <span class="n">s2name</span><span class="o">=</span><span class="n">pressure_info</span><span class="o">.</span><span class="n">s2name</span><span class="p">,</span>
+                       <span class="n">fs</span><span class="o">=</span><span class="n">pressure_info</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
+                       <span class="n">filtInfo</span><span class="o">=</span><span class="n">pressure_info</span><span class="o">.</span><span class="n">filtInfo</span><span class="p">,</span>
+                       <span class="n">calibInfo</span><span class="o">=</span><span class="n">pressure_info</span><span class="o">.</span><span class="n">calibInfo</span><span class="p">,</span>
+                       <span class="n">offsetInfo</span><span class="o">=</span><span class="n">pressure_info</span><span class="o">.</span><span class="n">offsetInfo</span><span class="p">,</span>
+                       <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pressure</span>
+<span class="go">Signal(sig=sig, name=&#39;pressure&#39;, s2name=&#39;signal&#39;, stype=&#39;waveform&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pressure</span><span class="o">.</span><span class="n">fs</span>
+<span class="go">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pressure</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+<span class="go">array([0.  , 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pressure</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+<span class="go">array([ 3.75823975e-01,  7.62939453e-04, -3.74450684e-01, -7.35626221e-01,</span>
+<span class="go">       -1.07086182e+00, -1.36871338e+00, -1.61758423e+00, -1.80999756e+00,</span>
+<span class="go">       -1.93664551e+00, -1.99569702e+00])</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>Although we did not provide the sampling frequency (<cite>fs</cite>) of our pressure
+signal, <a class="reference internal" href="api.html#module-spike2py" title="spike2py"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spike2py</span></code></a> retreived it from the information
+contained in information included in the the MATLAB file.</li>
+<li><cite>waveform</cite> signal types have their sample times in the <cite>.times</cite>
+attribute and their raw signal in the <cite>.raw</cite> attribute.</li>
+</ul>
+</div>
+<p>We will repeat the process one last time with our <cite>emg</cite> signal:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">emg_info</span> <span class="o">=</span> <span class="n">spk2</span><span class="o">.</span><span class="n">SigInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;biceps&#39;</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="s1">&#39;sEMG&#39;</span><span class="p">,</span> <span class="n">s2name</span><span class="o">=</span><span class="s1">&#39;EMG&#39;</span><span class="p">)</span>
+<span class="n">biceps</span> <span class="o">=</span> <span class="n">spk2</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">sig</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">emg_info</span><span class="o">.</span><span class="n">s2name</span><span class="p">],</span>
+                     <span class="n">stype</span><span class="o">=</span><span class="n">emg_info</span><span class="o">.</span><span class="n">stype</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="n">emg_info</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                     <span class="n">s2name</span><span class="o">=</span><span class="n">emg_info</span><span class="o">.</span><span class="n">s2name</span><span class="p">,</span>
+                     <span class="n">fs</span><span class="o">=</span><span class="n">emg_info</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
+                     <span class="n">filtInfo</span><span class="o">=</span><span class="n">emg_info</span><span class="o">.</span><span class="n">filtInfo</span><span class="p">,</span>
+                     <span class="n">calibInfo</span><span class="o">=</span><span class="n">emg_info</span><span class="o">.</span><span class="n">calibInfo</span><span class="p">,</span>
+                     <span class="n">offsetInfo</span><span class="o">=</span><span class="n">emg_info</span><span class="o">.</span><span class="n">offsetInfo</span><span class="p">,</span>
+                     <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">biceps</span>
+<span class="go">Signal(sig=sig, name=&#39;biceps&#39;, s2name=&#39;EMG&#39;, stype=&#39;sEMG&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">biceps</span><span class="o">.</span><span class="n">fs</span>
+<span class="go">2000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">biceps</span><span class="o">.</span><span class="n">filtInfo</span>
+<span class="go">FiltInfo(cutoff=[20, 450], order=4, type=&#39;bandpass&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">biceps</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+<span class="go">array([0.    , 0.0005, 0.001 , 0.0015, 0.002 , 0.0025, 0.003 , 0.0035,</span>
+<span class="go">       0.004 , 0.0045])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">biceps</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+<span class="go">array([ 0.07934562,  0.10477691,  0.14546697,  0.10782866,  0.00050863,</span>
+<span class="go">       -0.13885483, -0.18615703, -0.1734414 , -0.18564841, -0.23193336])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">biceps</span><span class="o">.</span><span class="n">proc</span>
+<span class="go">array([-0.00761917,  0.03972988,  0.05797267,  0.01434539, -0.09089459,</span>
+<span class="go">       -0.20199386, -0.25804102, -0.26125151, -0.26601012, -0.30022137])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">biceps</span><span class="o">.</span><span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+<span class="go">array([0.07934562, 0.10477691, 0.14546697, 0.10782866, 0.00050863,</span>
+<span class="go">       0.13885483, 0.18615703, 0.1734414 , 0.18564841, 0.23193336])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">biceps</span><span class="o">.</span><span class="n">envel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+<span class="go">array([0.10978258, 0.10942789, 0.10907111, 0.10871227, 0.10835142,</span>
+<span class="go">       0.10798861, 0.10762387, 0.10725725, 0.10688879, 0.10651856])</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>Although we did not provide the sampling frequency (<cite>fs</cite>) of our biceps
+emg signal, <a class="reference internal" href="api.html#module-spike2py" title="spike2py"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spike2py</span></code></a> retreived it from the information
+contained in information included in the the MATLAB file.</li>
+<li>Although we did not specify filter setting, the default is to apply a
+4th order 20-450Hz bandpass Butterworth filter on the raw data.</li>
+<li><cite>sEMG</cite> signal types have their sample times in the <cite>.times</cite>
+attribute and their raw signal in the <cite>.raw</cite> attribute.</li>
+<li><cite>proc</cite> contains the EMG signal after the mean has been removed and the
+default (or user specified) filter has been applied.</li>
+<li><cite>rect</cite> contains the rectified version of the <cite>proc</cite> signal.</li>
+<li><cite>envel</cite> contains the envelop of the rectified signal. The default settings
+use a 4th order 5Hz low-pass Butterworth filter, but the
+<a class="reference internal" href="api.html#spike2py.Signal.envelop" title="spike2py.Signal.envelop"><code class="xref py py-class docutils literal notranslate"><span class="pre">envelop</span></code></a> method can be re-run with a user-specified
+low-pass cut-off.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="trials">
+<h3>Trials<a class="headerlink" href="#trials" title="Permalink to this headline">¶</a></h3>
+<p>As mentioned previously, it can get quite tiresome to write code to generate
+individual <a class="reference internal" href="api.html#spike2py.Signal" title="spike2py.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a> objects for each of the signals your recorded.
+Thankfully, we can use <a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> to do all the heavy lifting for
+us, all we have to do is give it the right information.</p>
+<div class="section" id="trial-information">
+<h4>Trial Information<a class="headerlink" href="#trial-information" title="Permalink to this headline">¶</a></h4>
+<p>The first thing we need to do is create a <a class="reference internal" href="api.html#spike2py.TrialInfo" title="spike2py.TrialInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrialInfo</span></code></a>
+objectrig_info. The code below is a continuation of our example, which means
+we already created <cite>trig_info</cite>, <cite>pressure_info</cite> and <cite>emg_info</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">signals</span> <span class="o">=</span> <span class="p">[</span><span class="n">trig_info</span><span class="p">,</span> <span class="n">pressure_info</span><span class="p">,</span> <span class="n">emg_info</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp_cond</span> <span class="o">=</span> <span class="s1">&#39;maximum pressure trial 1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span><span class="s1">&#39;tutorials/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;max_push1.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial_info</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">TrialInfo</span><span class="p">(</span><span class="n">cond</span><span class="o">=</span><span class="n">exp_cond</span><span class="p">,</span>
+<span class="go">                                path=path,</span>
+<span class="go">                                filename=filename,</span>
+<span class="go">                                signals=signals,</span>
+<span class="go">                                )</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="api.html#spike2py.TrialInfo" title="spike2py.TrialInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrialInfo</span></code></a> requires:</p>
+<ul class="simple">
+<li><strong>cond</strong>: Informative name for trial.</li>
+<li><strong>path</strong>: Path to where the Matlab data file is stored.</li>
+<li><strong>filename</strong>: Filename of Matlab data file, with <cite>.mat</cite> extension.</li>
+<li><strong>signals</strong>: List of <a class="reference internal" href="api.html#spike2py.SigInfo" title="spike2py.SigInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">SigInfo</span></code></a> objects.</li>
+</ul>
+</div>
+<div class="section" id="trial-object">
+<h4>Trial Object<a class="headerlink" href="#trial-object" title="Permalink to this headline">¶</a></h4>
+<p>Now that we have <a class="reference internal" href="api.html#spike2py.TrialInfo" title="spike2py.TrialInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrialInfo</span></code></a> describing our current trial, lets
+pass it to <a class="reference internal" href="api.html#spike2py.Trial" title="spike2py.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span> <span class="o">=</span> <span class="n">spike2py</span><span class="o">.</span><span class="n">Trial</span><span class="p">(</span><span class="n">trial_info</span><span class="p">)</span>
+<span class="go">trial</span>
+<span class="go">Trial(path=&#39;tutorials/&#39;, filename=&#39;max_push1.mat&#39;, cond=&#39;maximum pressure trial 1&#39;, sig=sig)</span>
+<span class="go"># signals in trial:</span>
+<span class="go">#        trig</span>
+<span class="go">#        biceps</span>
+<span class="go">#        pressure</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">infoSignals</span>
+<span class="go">[SigInfo(name=&#39;trig&#39;,</span>
+<span class="go">                stype=&#39;trig&#39;,</span>
+<span class="go">                s2name=&#39;trig&#39;,</span>
+<span class="go">                filt_cutoff=None,</span>
+<span class="go">                filt_order=None,</span>
+<span class="go">                filt_type=None,</span>
+<span class="go">                calib_slope=None,</span>
+<span class="go">                calib_offset=None,</span>
+<span class="go">                offset_type=None,</span>
+<span class="go">                offset_val=None,</span>
+<span class="go">        offset_sig=&#39;proc&#39;),</span>
+<span class="go">SigInfo(name=&#39;biceps&#39;,</span>
+<span class="go">                stype=&#39;sEMG&#39;,</span>
+<span class="go">                s2name=&#39;EMG&#39;,</span>
+<span class="go">                filt_cutoff=[20, 450],</span>
+<span class="go">                filt_order=4,</span>
+<span class="go">                filt_type=&#39;bandpass&#39;,</span>
+<span class="go">                calib_slope=None,</span>
+<span class="go">                calib_offset=None,</span>
+<span class="go">                offset_type=None,</span>
+<span class="go">                offset_val=None,</span>
+<span class="go">        offset_sig=&#39;proc&#39;),</span>
+<span class="go">SigInfo(name=&#39;pressure&#39;,</span>
+<span class="go">                stype=&#39;waveform&#39;,</span>
+<span class="go">                s2name=&#39;signal&#39;,</span>
+<span class="go">                filt_cutoff=None,</span>
+<span class="go">                filt_order=None,</span>
+<span class="go">                filt_type=None,</span>
+<span class="go">                calib_slope=None,</span>
+<span class="go">                calib_offset=None,</span>
+<span class="go">                offset_type=None,</span>
+<span class="go">                offset_val=None,</span>
+<span class="go">        offset_sig=&#39;proc&#39;)]</span>
+</pre></div>
+</div>
+<p>Similar to the basic tutorial, we can access our <a class="reference internal" href="api.html#spike2py.Signal" title="spike2py.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a> by
+calling <cite>trial.sig[sig_name]</cite> and the various attributes we saw in the above
+section discussing <a class="reference internal" href="api.html#spike2py.Signal" title="spike2py.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;trig&#39;</span><span class="p">]</span>
+<span class="go">Signal(sig=sig, name=&#39;trig&#39;, s2name=&#39;trig&#39;, stype=&#39;trig&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">]</span>
+<span class="go">Signal(sig=sig, name=&#39;pressure&#39;, s2name=&#39;signal&#39;, stype=&#39;waveform&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;biceps&#39;</span><span class="p">]</span>
+<span class="go">Signal(sig=sig, name=&#39;biceps&#39;, s2name=&#39;EMG&#39;, stype=&#39;sEMG&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;trig&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+<span class="go">array([[0.701],</span>
+<span class="go">       [3.501],</span>
+<span class="go">       [3.801],</span>
+<span class="go">       [4.701],</span>
+<span class="go">       [4.901],</span>
+<span class="go">       [5.101],</span>
+<span class="go">       [5.301],</span>
+<span class="go">       [5.501],</span>
+<span class="go">       [5.701],</span>
+<span class="go">       [5.901]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pressure_times</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pressure_raw</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">sig</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{t}</span><span class="s1">, </span><span class="si">{p:4.2f}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pressure_times</span><span class="p">,</span> <span class="n">pressure_raw</span><span class="p">]</span>
+<span class="go"> 0.00,  0.38</span>
+<span class="go"> 0.01,  0.00</span>
+<span class="go"> 0.02, -0.37</span>
+<span class="go"> 0.03, -0.74</span>
+<span class="go"> 0.04, -1.07</span>
+<span class="go"> 0.05, -1.37</span>
+<span class="go"> 0.06, -1.62</span>
+<span class="go"> 0.07, -1.81</span>
+<span class="go"> 0.08, -1.94</span>
+<span class="go"> 0.09, -2.00</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Overview"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">spike2py 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Martin Héroux.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+    </div>
+  </body>
+</html>
