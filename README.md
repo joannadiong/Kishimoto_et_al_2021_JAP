@@ -17,7 +17,7 @@ Kishimoto KC, Héroux ME, Gandevia SC, Butler JE, Diong J (2021) Estimation of m
 
 ## Data
 
-Raw data to generate Fig 2 and 3 are stored in on the Open Science Framework (OSF) repository [https://osf.io/wt7z8/][https://osf.io/wt7z8/] and in **data -> raw** in these formats (in zipped folders):
+Raw data to generate Fig 2 and 3 are stored in on the Open Science Framework (OSF) repository [https://osf.io/wt7z8/][osf] and in **data -> raw** in these formats (in zipped folders):
     Spike2 .smr 
     Matlab .mat 
     Text .txt
@@ -100,6 +100,6 @@ Uncomment lines 47-48, 417 to save a log file in **stats -> log_files**.
 
 Run **script.do**.
 
-
+[osf]: https://osf.io/wt7z8/ 
 [spike2py]: https://github.com/MartinHeroux/spike2py
 [pycharm]: https://www.jetbrains.com/pycharm/promo/?gclid=Cj0KCQiAtqL-BRC0ARIsAF4K3WFahh-pzcvf6kmWnmuONEZxi544-Ty-UUqKa4EelnOxa5pAC9C4_d4aAisxEALw_wcB 
