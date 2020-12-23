@@ -242,14 +242,6 @@
           graph export torques.eps, replace
       }
       if `var' == lnemgso {
-        /*
-        twoway `graphtext2' ///
-        (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
-              (line mixedPred activations, lpattern(solid)) ///
-              , ///
-              xtitle("Activation [%]") ytitle("EMG SO [ln(mV)]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
-              graph export mixed_`var'.tif, width(1200) height(900) replace
-        */
         twoway (rarea mixedLPL mixedUPL activations, astyle(sunflowerlb)) /// /* 95% PI */
               (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
               (line mixedPred activations, lpattern(solid)) ///
@@ -271,14 +263,6 @@
     
       }
       if `var' == lnemgmg {
-        /*
-        twoway `graphtext2' ///
-        (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
-              (line mixedPred activations, lpattern(solid)) ///
-              , ///
-              xtitle("Activation [%]") ytitle("EMG MG [ln(mV)]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
-              graph export mixed_`var'.tif, width(1200) height(900) replace
-        */
         twoway (rarea mixedLPL mixedUPL activations, astyle(sunflowerlb)) /// 
             (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
             (line mixedPred activations, lpattern(solid)) ///
@@ -299,14 +283,6 @@
     
       }
       if `var' == lnemglg {
-        /*
-        twoway `graphtext2' ///
-            (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
-            (line mixedPred activations, lpattern(solid)) ///
-            , ///
-            xtitle("Activation [%]") ytitle("EMG LG [ln(mV)]") legend(off) aspect(1) legend(off) name(mixed_`var', replace)
-            graph export mixed_`var'.tif, width(1200) height(900) replace
-        */
         twoway (rarea mixedLPL mixedUPL activations, astyle(sunflowerlb)) /// 
             (rarea mixedLCL mixedUCL activations, astyle(sunflowerdb)) ///
             (line mixedPred activations, lpattern(solid)) ///
@@ -341,53 +317,7 @@
     restore
     drop mixedPred mixedSE mixedLCL mixedUCL mixedLPL mixedUPL emgFit
     
-    /*
-    
-    * Fit FP with robust SEs and extract predicted values. Show plot of fit.
-
-    mfp: regress `var' activations, cluster(subject)
-    quietly {
-        predict fracpred
-        predict fracSE, stdp
-        generate LCL = fracpred - invnormal(0.975) * fracSE
-        generate UCL = fracpred + invnormal(0.975) * fracSE
-    }
-    di "`graphtext2'"
-    sort activations
-
-    if `var' == torques {
-      twoway `graphtext2_', ///
-        xtitle("Torque (%MVC)") ytitle("Activation (%)") legend(off) aspect(1) name(frac_`var', replace)
-        * graph export frac_`var'.tif, width(1200) height(900) replace
-    }
-    if `var' == emgso {
-      twoway (rarea LCL UCL activations, astyle(sunflowerdb)) ///
-        `graphtext2' ///
-        (line fracpred activations, lpattern(solid) lcolor(black)) ///
-        , ///
-        xtitle("Activation (%)") ytitle("EMG SO (mV)") legend(off) aspect(1) name(frac_`var', replace)
-        graph export frac_`var'.tif, width(1200) height(900) replace
-    }
-    if `var' == emgmg {
-      twoway (rarea LCL UCL activations, astyle(sunflowerdb)) ///
-        `graphtext2' ///
-        (line fracpred activations, lpattern(solid) lcolor(black)) ///
-        , ///
-        xtitle("Activation (%)") ytitle("EMG MG (mV)") legend(off) aspect(1) name(frac_`var', replace)
-        graph export frac_`var'.tif, width(1200) height(900) replace
-    }
-    if `var' == emglg {
-      twoway (rarea LCL UCL activations, astyle(sunflowerdb)) ///
-        `graphtext2' ///
-        (line fracpred activations, lpattern(solid) lcolor(black)) ///
-        , ///
-        xtitle("Activation (%)") ytitle("EMG LG (mV)") legend(off) aspect(1) name(frac_`var', replace)
-        graph export frac_`var'.tif, width(1200) height(900) replace
-    }
-    
-    drop fracpred fracSE LCL UCL
-    */
-    
+     
     local graphtext2 = ""
     local graphtext2_ = ""
     
@@ -403,11 +333,9 @@
 
   graph drop all_torques all_emgso all_emgmg all_emglg
   graph drop all_lnemgso all_lnemgmg all_lnemglg 
-  *graph drop each_torques each_emgso each_emglg each_emgmg
   graph drop emgFit_lnemgso emgFit_lnemgmg emgFit_lnemglg 
 
   graph drop mixed_torques mixed_lnemgso mixed_lnemgmg mixed_lnemglg 
-  *graph drop frac_torques frac_emgso frac_emgmg frac_emglg
   graph drop all_mixed
 
 
@@ -416,25 +344,3 @@
 
   *log close
   exit
-
-  /*
-  graph combine all_emgso all_emgmg all_emglg ///
-    , ///
-    rows(3) ysize(9) xsize(4) name(emg, replace) /* 8 x 600 dpi = 4800 */
-    graph export emg.tif, width(2400) replace
-    graph export emg.eps, replace
-
-  graph combine mixed_emgso frac_emgso mixed_emgmg frac_emgmg mixed_emglg frac_emglg ///
-    , ///
-    rows(3) ysize(12) xsize(8) name(mixed_frac_all, replace) 
-  graph export mixed_frac_all.tif, width(4800) replace
-  graph export mixed_frac_all.eps, replace
-
-  graph drop all_torques all_emgso all_emgmg all_emglg
-  graph drop each_torques each_emgso each_emglg each_emgmg
-
-  graph drop mixed_torques mixed_emgso mixed_emgmg mixed_emglg 
-  graph drop frac_torques frac_emgso frac_emgmg frac_emglg
-  graph drop mixed_frac_all
-  graph drop emg
-  */
