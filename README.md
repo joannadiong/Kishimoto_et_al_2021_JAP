@@ -18,16 +18,16 @@ Kishimoto KC, Héroux ME, Gandevia SC, Butler JE, Diong J (2021) Estimation of m
 ## Data
 
 Raw data to generate Fig 2 and 3 are stored in on the Open Science Framework (OSF) repository [https://osf.io/wt7z8/][osf] and in **data -> raw** in these formats (in zipped folders):
-    Spike2 .smr 
-    Matlab .mat 
-    Text .txt
+* Spike2 .smr 
+* Matlab .mat 
+* Text .txt
 
 Unzip the folders and extract the folders **sub01** and **sub13** into **data -> raw** in the project folder.
 
 Processed data for statistical analysis and Stata code files are stored in the **stats** folder in these formats: 
-    Text .csv
-    Text .txt
-    Stata .do
+* Text .csv
+* Text .txt
+* Stata .do
 
 **stats -> data -> subjects_data.csv**
 The Stata .do file analyses processed data in this dataset.
@@ -52,11 +52,9 @@ To deactivate, type:
 
   `conda deactivate`
 
-However, the best way to reproduce the Python analysis would be to run the code in an integrated development environment (e.g. [PyCharm][pycharm]). Set the interpreter to operate in the virtual environment within the project folder.
+The most optimal way to reproduce the Python analysis would be to run the code in an integrated development environment (e.g. [PyCharm][pycharm]). Set the interpreter to operate in the virtual environment within the project folder.
 
-**process.py** calls the deprecated Python package **spike2py** written by Martin Héroux. Download the package to a location outside of the project folder, and point (i.e. add root) the Python interpreter towards that location.
-
-Note, for the new and revised packaged, see the [spike2py GitHub page][spike2py].
+**process.py** calls the deprecated Python package **spike2py** written by Martin Héroux. Download the package to a location outside of the project folder, and point (i.e. add root) the Python interpreter towards that location. (For the new and revised packaged, see the [spike2py GitHub page][spike2py].)
 
 **fig-2.py**: Generate SVG file of single participant trial data (Fig 2) in **data -> proc -> sub01**
 
@@ -90,7 +88,7 @@ Fig 4, 5 and 6 are generated from the Stata do file.
 
 Open **stats -> script.do**.
 
-File paths to generate results and figures are currently configured for Linux or Mac using forward single slashes `/`. To configure for Windows, use double backslashes `\\` (**script.do**, lines 28, 35-37). 
+File paths to generate results and figures are currently configured for Linux or Mac using forward single slashes /. To configure for Windows, use double backslashes \ (**script.do**, lines 28, 35-37). 
 
 In line 28 of **script.do**, set file path to local directory.
 
