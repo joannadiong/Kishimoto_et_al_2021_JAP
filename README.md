@@ -15,9 +15,13 @@ Joanna Diong<sup>2,4</sup>
 
 Kishimoto KC, Héroux ME, Gandevia SC, Butler JE, Diong J (2021) Estimation of maximal muscle electromyographic activity from the relationship between muscle activity and voluntary activation. Journal of Applied Physiology (in press).
 
+## Protocol registration
+
+The protocol was registered on the Open Science Framework (OSF): [https://osf.io/7f3nk][rego]
+
 ## Data
 
-Raw data to generate Fig 2 and 3 are stored in on the Open Science Framework (OSF) repository [https://osf.io/wt7z8/][osf] and in **data -> raw** in these formats (in zipped folders):
+Raw data to generate Fig 2 and 3 are available from the OSF repository [https://osf.io/wt7z8/][osf], and from the **data -> raw** folder in this GitHub repository in these formats (in zipped folders):
 * Spike2 .smr 
 * Matlab .mat 
 * Text .txt
@@ -36,7 +40,7 @@ The Stata .do file analyses processed data in this dataset.
 
 Python code files were written by Joanna Diong with input from Martin Héroux (Python v3.7). 
 
-Stata code files were written by Joanna Diong (Stata 16, compatible with v13 and up). 
+Stata code files were written by Joanna Diong (Stata v16, compatible with v13 and up). 
 
 ### Python
 
@@ -98,6 +102,7 @@ Uncomment lines 47-48, 417 to save a log file in **stats -> log_files**.
 
 Run **script.do**.
 
+[rego]: https://osf.io/7f3nk
 [osf]: https://osf.io/wt7z8/ 
 [spike2py]: https://github.com/MartinHeroux/spike2py
 [pycharm]: https://www.jetbrains.com/pycharm/promo/?gclid=Cj0KCQiAtqL-BRC0ARIsAF4K3WFahh-pzcvf6kmWnmuONEZxi544-Ty-UUqKa4EelnOxa5pAC9C4_d4aAisxEALw_wcB 
